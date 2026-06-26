@@ -1,0 +1,396 @@
+openapi: 3.0.3
+
+info:
+  title: Sovlens API
+  description: API REST de l'application Sovlens
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:4000
+    description: Environnement local
+
+tags:
+  - name: Auth
+  - name: Users
+  - name: Photos
+  - name: Albums
+  - name: Sharing
+  - name: Storage
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Créer un compte utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: Compte créé
+        "400":
+          description: Données invalides
+        "409":
+          description: Email déjà utilisé
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Connexion utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Authentification réussie
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Identifiants invalides
+
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Récupérer le profil utilisateur connecté
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Profil utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Non authentifié
+
+  /photos:
+    get:
+      tags: [Photos]
+      summary: Lister les photos de l'utilisateur
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des photos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Photo"
+
+    post:
+      tags: [Photos]
+      summary: Importer une photo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Photo importée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Photo"
+        "400":
+          description: Fichier invalide
+        "413":
+          description: Fichier supérieur à 10 MB
+
+  /photos/{id}:
+    get:
+      tags: [Photos]
+      summary: Récupérer une photo
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PhotoId"
+      responses:
+        "200":
+          description: Détail d'une photo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Photo"
+        "404":
+          description: Photo introuvable
+
+    delete:
+      tags: [Photos]
+      summary: Supprimer une photo
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PhotoId"
+      responses:
+        "204":
+          description: Photo supprimée
+        "404":
+          description: Photo introuvable
+
+  /albums:
+    get:
+      tags: [Albums]
+      summary: Lister les albums
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des albums
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Album"
+
+    post:
+      tags: [Albums]
+      summary: Créer un album
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAlbumRequest"
+      responses:
+        "201":
+          description: Album créé
+
+  /albums/{id}/photos:
+    post:
+      tags: [Albums]
+      summary: Ajouter une photo à un album
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/AlbumId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - photoId
+              properties:
+                photoId:
+                  type: string
+      responses:
+        "200":
+          description: Photo ajoutée à l'album
+
+  /sharing/photos/{id}:
+    post:
+      tags: [Sharing]
+      summary: Créer un lien public de partage
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PhotoId"
+      responses:
+        "201":
+          description: Lien de partage créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShareLink"
+
+  /storage/config:
+    get:
+      tags: [Storage]
+      summary: Récupérer la configuration de stockage
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Configuration actuelle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageConfig"
+
+    patch:
+      tags: [Storage]
+      summary: Modifier le fournisseur de stockage
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStorageConfigRequest"
+      responses:
+        "200":
+          description: Configuration mise à jour
+        "400":
+          description: Configuration invalide
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PhotoId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+
+    AlbumId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        createdAt:
+          type: string
+          format: date-time
+
+    Photo:
+      type: object
+      properties:
+        id:
+          type: string
+        filename:
+          type: string
+        objectKey:
+          type: string
+        url:
+          type: string
+        size:
+          type: integer
+        storageMode:
+          type: string
+          enum: [cloud, sovereign]
+        createdAt:
+          type: string
+          format: date-time
+
+    Album:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateAlbumRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+
+    ShareLink:
+      type: object
+      properties:
+        token:
+          type: string
+        url:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+    StorageConfig:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum: [cloud, sovereign]
+        endpoint:
+          type: string
+        bucket:
+          type: string
+
+    UpdateStorageConfigRequest:
+      type: object
+      required:
+        - mode
+      properties:
+        mode:
+          type: string
+          enum: [cloud, sovereign]
+        endpoint:
+          type: string
+        accessKey:
+          type: string
+        secretKey:
+          type: string
+        bucket:
+          type: string
