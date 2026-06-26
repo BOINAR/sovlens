@@ -1,4 +1,18 @@
-# Diagramme de séquence 
+# Diagrammes de séquence
+
+## Objectif
+
+Ces diagrammes illustrent les principaux flux d'interaction entre le frontend, le backend, la base de données et les services de stockage de Sovlens.
+
+Ils présentent le fonctionnement de la Killer Feature du projet ainsi que les principaux échanges entre les différents composants de l'application.
+
+Les scénarios couverts sont :
+
+- upload d'une photo en mode cloud ;
+- activation du mode de stockage souverain ;
+- upload d'une photo en mode souverain.
+
+---
 
 ## Scénario 1 — Upload en mode cloud (par défaut)
 
@@ -11,15 +25,15 @@ sequenceDiagram
   participant DB as PostgreSQL
   participant GC as Garage cloud
 
-  U->>F: upload photo
+  U->>F: Upload d'une photo
   F->>B: POST /photos
-  B->>DB: lit le profil de stockage
-  DB-->>B: mode = cloud
+  B->>DB: Lecture du profil de stockage
+  DB-->>B: Mode = CLOUD
   B->>GC: PUT objet S3
   GC-->>B: URL de stockage
-  B->>DB: INSERT métadonnées + URL
+  B->>DB: INSERT des métadonnées
   B-->>F: 201 Created
-  F-->>U: photo uploadée
+  F-->>U: Photo ajoutée à la galerie
 ```
 
 ---
@@ -34,16 +48,20 @@ sequenceDiagram
   participant B as Backend
   participant DB as PostgreSQL
 
-  U->>F: ouvre les paramètres de stockage
+  U->>F: Ouvre les paramètres de stockage
   F->>B: GET /storage/config
-  B-->>F: configuration actuelle
-  F-->>U: affiche le formulaire
-  U->>F: configure le stockage souverain
+  B-->>F: Configuration actuelle
+
+  F-->>U: Affichage du formulaire
+
+  U->>F: Configure un stockage souverain
   F->>B: PATCH /storage/config
-  Note over B: vérifie la connexion au stockage souverain
-  B->>DB: UPDATE mode = souverain
+
+  Note over B: Vérification de la connexion<br/>au stockage compatible S3
+
+  B->>DB: UPDATE du profil de stockage
   B-->>F: 200 OK
-  F-->>U: mode souverain activé
+  F-->>U: Mode souverain activé
 ```
 
 ---
@@ -59,13 +77,19 @@ sequenceDiagram
   participant DB as PostgreSQL
   participant GS as Garage souverain
 
-  U->>F: upload photo
+  U->>F: Upload d'une photo
   F->>B: POST /photos
-  B->>DB: lit le profil de stockage
-  DB-->>B: mode = souverain
+  B->>DB: Lecture du profil de stockage
+  DB-->>B: Mode = SOVEREIGN
   B->>GS: PUT objet S3
   GS-->>B: URL de stockage
-  B->>DB: INSERT métadonnées + URL
+  B->>DB: INSERT des métadonnées
   B-->>F: 201 Created
-  F-->>U: photo stockée sur le stockage souverain
+  F-->>U: Photo ajoutée à la galerie
 ```
+
+## Conclusion
+
+Ces trois diagrammes mettent en évidence le fonctionnement de la Killer Feature de Sovlens. Quelle que soit la destination de stockage choisie (cloud ou souveraine), le frontend utilise la même API REST. Le backend sélectionne dynamiquement le fournisseur de stockage approprié avant d'enregistrer les métadonnées dans PostgreSQL.
+
+Cette architecture garantit une expérience utilisateur identique tout en laissant à chaque utilisateur le choix de l'emplacement de stockage de ses photos.
