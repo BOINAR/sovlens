@@ -18,7 +18,7 @@ Les solutions étudiées sont :
 
 | Critère | Google Photos | iCloud Photos | Immich | Sovlens |
 |----------|---------------|---------------|---------|----------|
-| Open Source | ❌ | ❌ | ✅ | ✅ |
+| Open source | ❌ | ❌ | ✅ | ✅ |
 | Auto-hébergement | ❌ | ❌ | ✅ | ✅ |
 | Stockage cloud | ✅ | ✅ | ⚠️ (manuel) | ✅ |
 | Stockage souverain | ❌ | ❌ | ✅ | ✅ |
@@ -27,6 +27,8 @@ Les solutions étudiées sont :
 | Albums | ✅ | ✅ | ✅ | ✅ |
 | API documentée | ❌ | ❌ | ✅ | ✅ |
 | Compatible S3 | ❌ | ❌ | ❌ | ✅ |
+| Expérience utilisateur | Excellente | Excellente | Bonne | Moderne |
+| Prix | Freemium | Abonnement iCloud+ | Gratuit | Open source |
 
 ---
 
@@ -39,6 +41,7 @@ Les solutions étudiées sont :
 - Interface très intuitive.
 - Excellente recherche.
 - Synchronisation automatique.
+- Intégration avec l'écosystème Google.
 
 ### Limites
 
@@ -55,6 +58,7 @@ Les solutions étudiées sont :
 
 - Très bonne intégration avec l'écosystème Apple.
 - Synchronisation automatique.
+- Expérience utilisateur fluide sur les appareils Apple.
 
 ### Limites
 
@@ -71,6 +75,7 @@ Les solutions étudiées sont :
 - Open source.
 - Auto-hébergeable.
 - Communauté active.
+- Interface moderne.
 
 ### Limites
 
@@ -80,7 +85,7 @@ Les solutions étudiées sont :
 
 ---
 
-# Identification des besoins non couverts
+# Identification des opportunités de différenciation
 
 L'étude met en évidence plusieurs limites des solutions existantes :
 
@@ -89,6 +94,8 @@ L'étude met en évidence plusieurs limites des solutions existantes :
 - manque de contrôle sur la localisation des données ;
 - complexité des solutions auto-hébergées.
 
+Ces constats mettent en évidence une opportunité de proposer une solution conciliant simplicité d'utilisation et maîtrise des données.
+
 ---
 
 # Positionnement de Sovlens
@@ -96,20 +103,20 @@ L'étude met en évidence plusieurs limites des solutions existantes :
 Sovlens reprend les fonctionnalités essentielles d'une application moderne de gestion de photos :
 
 - authentification sécurisée ;
-- galerie ;
-- albums ;
+- galerie de photos ;
+- gestion d'albums ;
 - partage par lien public.
 
-Le projet se différencie grâce à une fonctionnalité supplémentaire :
+Le projet se différencie grâce à sa Killer Feature :
 
-- possibilité de basculer entre un stockage cloud et un stockage souverain compatible S3 directement depuis l'application.
+- possibilité de basculer dynamiquement entre un stockage cloud et un stockage souverain compatible S3 directement depuis l'application.
 
-Cette approche permet de conserver une expérience utilisateur identique tout en laissant à chaque utilisateur le choix du lieu de stockage de ses données.
+L'utilisateur conserve ainsi la même expérience d'utilisation tout en choisissant librement l'emplacement de stockage de ses données.
 
 ---
 
 # Conclusion
 
-Le benchmark montre que les solutions existantes répondent correctement aux besoins de stockage et de partage de photos, mais offrent peu de flexibilité concernant l'hébergement des données.
+Le benchmark met en évidence que les solutions actuelles proposent une excellente expérience de gestion de photos, mais restent fortement liées à un mode de stockage imposé, qu'il soit propriétaire ou auto-hébergé.
 
 Sovlens se distingue par une architecture permettant de choisir librement le fournisseur de stockage sans modifier l'utilisation quotidienne de l'application. Cette capacité constitue la principale valeur ajoutée du projet.
