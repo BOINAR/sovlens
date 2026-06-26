@@ -2,59 +2,71 @@
 
 ## Objectif
 
-Le backlog produit regroupe l'ensemble des fonctionnalités et livrables identifiés pour le projet Sovlens. Les éléments sont priorisés afin de permettre un développement incrémental selon une approche Agile (Scrum).
+Le backlog produit regroupe l'ensemble des fonctionnalités prévues pour **Sovlens**. Il constitue la liste priorisée des besoins métier à développer et sert de référence pour l'organisation des sprints selon une approche Agile (Scrum).
+
+Chaque élément du backlog correspond à une **User Story** et est estimé en **Story Points (SP)** afin de faciliter la planification des itérations.
 
 ---
 
-# Fonctionnalités
+# Product Backlog
 
-| ID | Élément | Priorité | Estimation |
-|----|----------|:--------:|:----------:|
-| US-01 | Authentification des utilisateurs | Haute | 8 SP |
-| US-02 | Gestion du profil utilisateur | Haute | 5 SP |
-| US-03 | Import de photos | Haute | 8 SP |
-| US-04 | Galerie de photos | Haute | 8 SP |
-| US-05 | Gestion des albums | Moyenne | 5 SP |
-| US-06 | Partage de photos | Moyenne | 5 SP |
-| US-07 | Gestion des profils de stockage | Haute | 8 SP |
-| US-08 | Bascule Cloud ↔ Homelab | Haute | 13 SP |
-| US-09 | Monitoring et observabilité | Moyenne | 5 SP |
-| US-10 | Tableau de bord administrateur | Faible | 8 SP |
-
----
-
-# Livrables techniques
-
-| Élément |
-|----------|
-| Diagrammes C4 |
-| Diagrammes UML |
-| Modèle de données |
-| Documentation API |
-| Rapport Green IT |
-| Benchmark |
-| Personas |
-| User Stories |
-| ADR |
-| Documentation technique |
+| ID | User Story | Priorité (MoSCoW) | Story Points | Statut |
+|----|------------|:-----------------:|:------------:|:------:|
+| US-01 | Création d'un compte utilisateur | Must | 3 | À faire |
+| US-02 | Connexion à l'application | Must | 3 | À faire |
+| US-03 | Upload d'une photo | Must | 5 | À faire |
+| US-04 | Consulter la galerie | Must | 5 | À faire |
+| US-05 | Gérer des albums | Should | 5 | À faire |
+| US-06 | Partager une photo ou un album | Should | 5 | À faire |
+| US-07 | Configurer un stockage compatible S3 (Killer Feature) | Must | 8 | À faire |
 
 ---
 
 # Gestion du backlog
 
-Les éléments du backlog sont suivis dans GitHub Projects.
+Le backlog est géré dans **GitHub Projects**.
 
-Chaque fonctionnalité est associée à une ou plusieurs GitHub Issues permettant de suivre son avancement jusqu'à sa réalisation.
+Chaque User Story est associée à une ou plusieurs **GitHub Issues** permettant de suivre son avancement jusqu'à sa réalisation.
+
+Les éléments du backlog sont organisés en fonction de leur priorité et de leurs dépendances techniques afin de faciliter la planification des sprints.
 
 ---
 
 # Méthode de priorisation
 
-Les éléments sont priorisés selon les critères suivants :
+Les User Stories sont priorisées selon la méthode **MoSCoW** :
 
-- valeur métier ;
-- dépendances techniques ;
-- complexité de développement ;
-- contribution à la Killer Feature.
+- **Must** : indispensable au MVP ;
+- **Should** : fortement recommandé ;
+- **Could** : amélioration pouvant être développée ultérieurement ;
+- **Won't** : hors périmètre de cette version.
 
-Les fonctionnalités indispensables au MVP sont traitées en priorité.
+Les critères de priorisation prennent en compte :
+
+- la valeur apportée à l'utilisateur ;
+- les dépendances techniques ;
+- la complexité de développement ;
+- la contribution à la Killer Feature.
+
+---
+
+# Estimation des User Stories
+
+Les estimations sont exprimées en **Story Points (SP)**.
+
+Les Story Points permettent d'évaluer l'effort global de développement en prenant en compte :
+
+- la complexité technique ;
+- le volume de travail ;
+- les risques ;
+- les incertitudes.
+
+Cette estimation facilite la planification des sprints et le suivi de l'avancement du projet.
+
+---
+
+# Synthèse
+
+Le Product Backlog constitue le référentiel des fonctionnalités prévues pour Sovlens.
+
+Il est mis à jour tout au long du projet afin de refléter l'évolution des besoins et sert de support à la planification des sprints, au suivi des développements et à l'organisation des GitHub Issues.
