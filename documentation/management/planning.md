@@ -2,44 +2,46 @@
 
 ## Objectif
 
-Le planning du projet définit les principales phases de réalisation de Sovlens. Il permet de planifier les activités, de suivre l'avancement du projet et d'identifier les principaux jalons.
+Le planning du projet définit les principales phases de réalisation de **Sovlens**. Il permet de planifier les activités, de suivre l'avancement du projet et d'identifier les principaux jalons.
+
+Le projet est organisé selon une approche Agile inspirée de Scrum, avec une progression incrémentale des fonctionnalités et des livrables.
 
 ---
 
 # Méthodologie
 
-Le projet est conduit selon une approche Agile inspirée de Scrum.
+Le développement est découpé en plusieurs sprints.
 
-Le travail est organisé en plusieurs sprints permettant de produire progressivement les fonctionnalités du MVP, la Killer Feature ainsi que les différents livrables attendus.
+Chaque sprint produit un ensemble cohérent de fonctionnalités ou de livrables permettant de valider progressivement les objectifs du projet.
 
 ---
 
-# Planification
+# Planification des sprints
 
-| Sprint | Objectifs | Livrables |
-|----------|-----------|------------|
-| Sprint 1 | Analyse des besoins, benchmark, personas, user stories, architecture | Documentation d'analyse |
-| Sprint 2 | Modélisation, base de données, diagrammes UML et C4 | Documentation d'architecture |
-| Sprint 3 | Développement du backend et de l'API | Backend NestJS |
-| Sprint 4 | Développement du frontend et intégration | Frontend Next.js |
-| Sprint 5 | Déploiement, tests, documentation finale | MVP, Killer Feature, soutenance |
+| Sprint | Durée | Objectifs principaux | Livrables |
+|---------|:-----:|----------------------|------------|
+| Sprint 1 | 2 semaines | Analyse des besoins, benchmark, personas, user stories | Documentation d'analyse |
+| Sprint 2 | 2 semaines | Architecture logicielle, diagrammes UML, diagrammes C4, modèles de données | Documentation d'architecture |
+| Sprint 3 | 3 semaines | Développement du backend, API REST, authentification | Backend NestJS |
+| Sprint 4 | 3 semaines | Développement du frontend et intégration avec l'API | Frontend Next.js |
+| Sprint 5 | 2 semaines | Déploiement, tests, documentation finale et préparation de la soutenance | MVP, Killer Feature, documentation finale |
 
 ---
 
 # Jalons
 
-| Jalon | Description |
-|--------|-------------|
-| J1 | Validation des besoins |
-| J2 | Validation de l'architecture |
-| J3 | MVP fonctionnel |
-| J4 | Killer Feature opérationnelle |
-| J5 | Déploiement final |
-| J6 | Soutenance |
+| Jalon | Description | Livrable associé |
+|--------|-------------|------------------|
+| J1 | Validation des besoins | Documentation d'analyse |
+| J2 | Validation de l'architecture | Documentation d'architecture |
+| J3 | Backend opérationnel | API REST |
+| J4 | MVP fonctionnel | Frontend et Backend intégrés |
+| J5 | Killer Feature opérationnelle | Bascule Cloud ↔ Stockage souverain |
+| J6 | Livraison finale | Documentation complète et soutenance |
 
 ---
 
-# Activités
+# Macro-planning
 
 | Activité | S1 | S2 | S3 | S4 | S5 |
 |-----------|:--:|:--:|:--:|:--:|:--:|
@@ -49,9 +51,9 @@ Le travail est organisé en plusieurs sprints permettant de produire progressive
 | User Stories | ● | | | | |
 | Architecture | ● | ● | | | |
 | Modèle de données | | ● | | | |
-| Backend | | | ● | ● | |
-| Frontend | | | | ● | ● |
-| API | | | ● | ● | |
+| Développement Backend | | | ● | ● | |
+| Développement Frontend | | | | ● | ● |
+| Développement API REST | | | ● | ● | |
 | Tests | | | | ● | ● |
 | Déploiement | | | | | ● |
 | Documentation | ● | ● | ● | ● | ● |
@@ -64,11 +66,26 @@ Le pilotage du projet repose sur les outils suivants :
 
 - GitHub Projects pour le suivi des tâches ;
 - GitHub Issues pour la gestion du backlog ;
-- Git pour le versionnement ;
-- GitHub Actions pour l'intégration continue.
+- Git pour le versionnement du code source ;
+- GitHub Actions pour l'intégration continue (CI).
+
+---
+
+# Suivi de l'avancement
+
+À l'issue de chaque sprint :
+
+- les fonctionnalités développées sont validées ;
+- la documentation est mise à jour ;
+- les risques sont réévalués ;
+- le backlog est ajusté si nécessaire.
+
+Cette approche permet une amélioration continue tout au long du projet.
 
 ---
 
 # Conclusion
 
-Ce planning permet de structurer le projet autour de jalons clairement identifiés. Chaque sprint produit un ensemble de livrables permettant de suivre l'avancement du développement et de valider progressivement les objectifs fixés.
+Ce planning structure le développement de Sovlens autour de jalons clairement identifiés.
+
+L'organisation en sprints permet de produire progressivement les fonctionnalités du MVP, la Killer Feature ainsi que l'ensemble des livrables attendus, tout en assurant un suivi régulier de l'avancement du projet.
