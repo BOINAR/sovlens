@@ -10,7 +10,8 @@ Les scénarios couverts sont :
 
 - upload d'une photo en mode cloud ;
 - activation du mode de stockage souverain ;
-- upload d'une photo en mode souverain.
+- upload d'une photo en mode souverain ;
+- partage public d'une photo ou d'un album.
 
 ---
 
@@ -88,8 +89,38 @@ sequenceDiagram
   F-->>U: Photo ajoutée à la galerie
 ```
 
+---
+
+## Scénario 4 — Partage d'une photo ou d'un album
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'fontSize': '16px'}}}%%
+sequenceDiagram
+  actor U as Utilisateur
+  participant F as Frontend
+  participant B as Backend
+  participant DB as PostgreSQL
+  actor P as Destinataire
+
+  U->>F: Clique sur « Partager »
+  F->>B: POST /share-links
+  B->>DB: Vérifie la propriété de la ressource
+  DB-->>B: Ressource autorisée
+  B->>B: Génère un token unique
+  B->>DB: INSERT du lien de partage
+  B-->>F: URL publique
+  F-->>U: Affiche le lien de partage
+
+  U-->>P: Transmet le lien
+
+  P->>B: GET /shared/:token
+  B->>DB: Recherche du lien de partage
+  DB-->>B: Ressource trouvée
+  B-->>P: Affiche la photo ou l'album partagé
+```
+
 ## Conclusion
 
-Ces trois diagrammes mettent en évidence le fonctionnement de la Killer Feature de Sovlens. Quelle que soit la destination de stockage choisie (cloud ou souveraine), le frontend utilise la même API REST. Le backend sélectionne dynamiquement le fournisseur de stockage approprié avant d'enregistrer les métadonnées dans PostgreSQL.
+Ces diagrammes présentent les principaux flux fonctionnels de Sovlens : l'upload d'une photo, l'activation du mode de stockage souverain, le stockage des fichiers selon le mode choisi et le partage public de photos ou d'albums.
 
-Cette architecture garantit une expérience utilisateur identique tout en laissant à chaque utilisateur le choix de l'emplacement de stockage de ses photos.
+Ils montrent que le frontend interagit toujours avec la même API REST. Le backend se charge ensuite de sélectionner le fournisseur de stockage approprié et de gérer les traitements métier, garantissant une expérience utilisateur identique quel que soit le mode de stockage retenu.
