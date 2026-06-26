@@ -6,6 +6,8 @@ Ce document présente le modèle logique de données de Sovlens.
 
 Il transforme le MCD en structure relationnelle exploitable dans une base de données SQL.
 
+---
+
 ## Tables principales
 
 - `users`
@@ -24,14 +26,13 @@ users(
   id PK,
   email UNIQUE NOT NULL,
   password_hash NOT NULL,
-  role NOT NULL,
   created_at NOT NULL,
   updated_at NOT NULL
 )
 
 photos(
   id PK,
-  user_id FK -> users.id,
+  user_id FK -> users.id NOT NULL,
   filename NOT NULL,
   mime_type NOT NULL,
   size NOT NULL,
@@ -43,33 +44,39 @@ photos(
 
 albums(
   id PK,
-  user_id FK -> users.id,
+  user_id FK -> users.id NOT NULL,
   name NOT NULL,
   created_at NOT NULL,
   updated_at NOT NULL
 )
 
 album_photos(
-  album_id PK, FK -> albums.id,
-  photo_id PK, FK -> photos.id
+  album_id PK, FK -> albums.id NOT NULL,
+  photo_id PK, FK -> photos.id NOT NULL
 )
 
 share_links(
   id PK,
-  user_id FK -> users.id,
+  user_id FK -> users.id NOT NULL,
   photo_id FK -> photos.id NULL,
   album_id FK -> albums.id NULL,
   token UNIQUE NOT NULL,
   expires_at NULL,
-  created_at NOT NULL
+  created_at NOT NULL,
+  CHECK (
+    (photo_id IS NOT NULL AND album_id IS NULL)
+    OR
+    (photo_id IS NULL AND album_id IS NOT NULL)
+  )
 )
 
 storage_profiles(
   id PK,
-  user_id FK -> users.id UNIQUE,
+  user_id FK -> users.id UNIQUE NOT NULL,
   mode NOT NULL,
   endpoint NULL,
   bucket NULL,
+  created_at NOT NULL,
   updated_at NOT NULL
 )
 ```
@@ -87,7 +94,6 @@ Table des utilisateurs de l'application.
 | id | UUID | Clé primaire |
 | email | String | Unique, obligatoire |
 | password_hash | String | Obligatoire |
-| role | String | Obligatoire |
 | created_at | DateTime | Obligatoire |
 | updated_at | DateTime | Obligatoire |
 
@@ -100,7 +106,7 @@ Table des métadonnées des photos.
 | Colonne | Type logique | Contrainte |
 |---|---|---|
 | id | UUID | Clé primaire |
-| user_id | UUID | Clé étrangère vers `users.id` |
+| user_id | UUID | Clé étrangère vers `users.id`, obligatoire |
 | filename | String | Obligatoire |
 | mime_type | String | Obligatoire |
 | size | Integer | Obligatoire |
@@ -118,7 +124,7 @@ Table des albums créés par les utilisateurs.
 | Colonne | Type logique | Contrainte |
 |---|---|---|
 | id | UUID | Clé primaire |
-| user_id | UUID | Clé étrangère vers `users.id` |
+| user_id | UUID | Clé étrangère vers `users.id`, obligatoire |
 | name | String | Obligatoire |
 | created_at | DateTime | Obligatoire |
 | updated_at | DateTime | Obligatoire |
@@ -147,12 +153,22 @@ Un lien de partage peut cibler soit une photo, soit un album.
 | Colonne | Type logique | Contrainte |
 |---|---|---|
 | id | UUID | Clé primaire |
-| user_id | UUID | Clé étrangère vers `users.id` |
+| user_id | UUID | Clé étrangère vers `users.id`, obligatoire |
 | photo_id | UUID | Clé étrangère vers `photos.id`, nullable |
 | album_id | UUID | Clé étrangère vers `albums.id`, nullable |
 | token | String | Unique, obligatoire |
 | expires_at | DateTime | Nullable |
 | created_at | DateTime | Obligatoire |
+
+Contrainte métier :
+
+```text
+(photo_id IS NOT NULL AND album_id IS NULL)
+OR
+(photo_id IS NULL AND album_id IS NOT NULL)
+```
+
+Cette contrainte garantit qu'un lien de partage cible soit une photo, soit un album, mais jamais les deux simultanément.
 
 ---
 
@@ -165,10 +181,11 @@ Elle permet de connaître le mode de stockage utilisé pour les fichiers de l'ut
 | Colonne | Type logique | Contrainte |
 |---|---|---|
 | id | UUID | Clé primaire |
-| user_id | UUID | Clé étrangère vers `users.id`, unique |
+| user_id | UUID | Clé étrangère vers `users.id`, unique, obligatoire |
 | mode | String | Obligatoire |
 | endpoint | String | Nullable |
 | bucket | String | Nullable |
+| created_at | DateTime | Obligatoire |
 | updated_at | DateTime | Obligatoire |
 
 ---
@@ -191,9 +208,10 @@ Elle permet de connaître le mode de stockage utilisé pour les fichiers de l'ut
 
 ### Contraintes métier
 
-- Un lien de partage doit cibler soit une photo, soit un album.
+- Un lien de partage doit cibler soit une photo, soit un album, jamais les deux simultanément.
 - Une photo peut exister sans être associée à un album.
 - Un album peut exister sans contenir de photo.
+- Un utilisateur possède un seul profil de stockage actif.
 - Le mode de stockage permet de différencier le stockage cloud du stockage souverain.
 
 ---
