@@ -2,49 +2,49 @@
 %%{init: {'theme': 'dark', 'themeVariables': {'fontSize': '16px'}}}%%
 flowchart TD
 
-  U(["Utilisateur\nNavigateur / Mobile"])
-  GL(["GitHub Actions\nBuild → Test → Deploy"])
+    U(["Utilisateur<br/>Navigateur / Mobile"])
+    GL(["GitHub Actions<br/>Build → Test → Deploy"])
 
-  subgraph VPS ["VPS — Docker Swarm + Caddy"]
+    subgraph VPS ["VPS — Docker Swarm + Caddy"]
 
-    CA["Caddy\nReverse Proxy + HTTPS auto"]
+        CA["Caddy<br/>Reverse Proxy + HTTPS"]
 
-    FE["Frontend\nNext.js 16"]
+        FE["Frontend<br/>Next.js 16"]
 
-    BE["Backend API\nNestJS + Fastify\n\nStorage Router\n(Strategy Pattern)"]
+        BE["Backend API<br/>NestJS + Fastify<br/><br/>Service de stockage"]
 
-    DB[("Base de données\nPostgreSQL 18")]
+        DB[("Base de données<br/>PostgreSQL 18")]
 
-    GC[("Stockage objet\nGarage (S3 compatible)")]
+        GC[("Stockage objet<br/>Garage (S3 compatible)")]
 
-    MO["Monitoring\nPrometheus + Grafana"]
+        MO["Monitoring<br/>Prometheus + Grafana"]
 
-  end
+    end
 
-  subgraph HL ["Mini PC — Proxmox VE"]
+    subgraph HOME ["Mini PC — Proxmox VE"]
 
-    UB["VM Ubuntu Server\nDocker Swarm"]
+        VM["VM Ubuntu Server<br/>Docker Swarm"]
 
-    GH[("Stockage objet\nGarage (S3 compatible)")]
+        GH[("Stockage objet<br/>Garage (S3 compatible)")]
 
-    UB --> GH
+        VM --> GH
 
-  end
+    end
 
-  U -->|HTTPS| CA
+    U -->|HTTPS| CA
 
-  CA -->|Proxy| FE
-  CA -->|Proxy| BE
+    CA -->|Frontend| FE
+    CA -->|API REST| BE
 
-  FE -->|REST API| BE
+    FE -->|JWT + REST API| BE
 
-  BE -->|SQL| DB
+    BE -->|SQL| DB
 
-  BE -->|Mode cloud : API S3| GC
+    BE -->|Mode Cloud : API S3| GC
 
-  BE -.->|Mode souverain : API S3 sécurisée| GH
+    BE -.->|Mode Souverain : API S3 sécurisée| GH
 
-  BE -->|Métriques| MO
+    BE -->|Métriques| MO
 
-  GL -.->|Déploiement SSH| BE
+    GL -.->|Déploiement SSH| VPS
 ```
