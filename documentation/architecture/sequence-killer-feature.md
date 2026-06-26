@@ -1,6 +1,6 @@
 # Diagramme de séquence — Killer Feature
 
-## Scénario 1 — Upload mode cloud (défaut)
+## Scénario 1 — Upload en mode cloud (par défaut)
 
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': {'fontSize': '16px'}}}%%
@@ -13,16 +13,18 @@ sequenceDiagram
 
   U->>F: upload photo
   F->>B: POST /photos
-  B->>DB: lit config storage
+  B->>DB: lit le profil de stockage
   DB-->>B: mode = cloud
   B->>GC: PUT objet S3
-  GC-->>B: url stockage
-  B->>DB: INSERT metadata + url
+  GC-->>B: URL de stockage
+  B->>DB: INSERT métadonnées + URL
   B-->>F: 201 Created
   F-->>U: photo uploadée
 ```
 
-## Scénario 2 — Activation mode expert (homelab)
+---
+
+## Scénario 2 — Activation du mode souverain
 
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': {'fontSize': '16px'}}}%%
@@ -32,19 +34,21 @@ sequenceDiagram
   participant B as Backend
   participant DB as PostgreSQL
 
-  U->>F: ouvre paramètres stockage
+  U->>F: ouvre les paramètres de stockage
   F->>B: GET /storage/config
-  B-->>F: config actuelle
-  F-->>U: affiche formulaire
-  U->>F: endpoint + credentials homelab
+  B-->>F: configuration actuelle
+  F-->>U: affiche le formulaire
+  U->>F: configure le stockage souverain
   F->>B: PATCH /storage/config
-  Note over B: test connexion Garage homelab
-  B->>DB: UPDATE mode = homelab
+  Note over B: vérifie la connexion au stockage souverain
+  B->>DB: UPDATE mode = souverain
   B-->>F: 200 OK
-  F-->>U: mode homelab actif
+  F-->>U: mode souverain activé
 ```
 
-## Scénario 3 — Upload mode homelab (souverain)
+---
+
+## Scénario 3 — Upload en mode souverain
 
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': {'fontSize': '16px'}}}%%
@@ -53,15 +57,15 @@ sequenceDiagram
   participant F as Frontend
   participant B as Backend
   participant DB as PostgreSQL
-  participant GH as Garage homelab
+  participant GS as Garage souverain
 
   U->>F: upload photo
   F->>B: POST /photos
-  B->>DB: lit config storage
-  DB-->>B: mode = homelab
-  B->>GH: PUT objet S3 via internet
-  GH-->>B: url homelab
-  B->>DB: INSERT metadata + url
+  B->>DB: lit le profil de stockage
+  DB-->>B: mode = souverain
+  B->>GS: PUT objet S3
+  GS-->>B: URL de stockage
+  B->>DB: INSERT métadonnées + URL
   B-->>F: 201 Created
-  F-->>U: photo stockée sur homelab
+  F-->>U: photo stockée sur le stockage souverain
 ```

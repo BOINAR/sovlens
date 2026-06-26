@@ -1,80 +1,150 @@
-# Rapport de Veille Technologique & Green IT
+# Rapport de veille technologique & Green IT
 
 ## Contexte
 
-PhotoApp est une application de gestion de photos souveraine, conçue pour offrir
-une alternative éthique et écologique aux solutions GAFAM. Chaque choix technique
-a été évalué sous l'angle de la performance et de l'éco-responsabilité.
+Sovlens est une application de gestion de photos souveraine conçue comme une alternative open source aux solutions de stockage de photos proposées par les grandes plateformes cloud.
 
-## Principes Green IT appliqués
+L'objectif est de permettre aux utilisateurs de conserver la maîtrise de leurs données tout en limitant l'impact environnemental de l'infrastructure utilisée.
 
-### 1. Mutualisation des ressources matérielles
+Chaque choix technique du projet a été étudié sous l'angle de la performance, de la sobriété numérique et de la souveraineté des données.
 
-Le projet s'appuie sur du matériel existant — un mini PC avec Proxmox déjà en
-place — plutôt que de provisionner de nouvelles machines cloud. La virtualisation
-via Proxmox permet de faire tourner plusieurs services sur un seul nœud physique,
-optimisant ainsi l'utilisation des ressources et évitant la surconsommation liée
-aux serveurs cloud surdimensionnés des GAFAM.
+---
 
-### 2. Stack légère et sans dépendances lourdes
+# Principes Green IT appliqués
 
-- **Drizzle ORM** : aucun binaire embarqué, ~7kb minifié contre ~50MB pour Prisma.
-- **NestJS + Fastify** : Fastify consomme moins de mémoire qu'Express (~30% de gain).
-- **Garage** : écrit en Rust, consommation mémoire minimale comparé à MinIO ou Ceph.
-- **Caddy** : binaire unique, gestion HTTPS automatique sans dépendances externes.
+## 1. Mutualisation des ressources matérielles
 
-### 3. Pas de dépendance aux GAFAM
+Le projet repose sur deux infrastructures complémentaires :
 
-L'ensemble de la stack est open source et auto-hébergée :
-- Aucune donnée ne transite par AWS, Google Cloud ou Azure
-- Aucun service tiers payant ou soumis à des conditions commerciales changeantes
-- Souveraineté totale sur les données utilisateur
+- un VPS mutualisé hébergeant l'application en mode cloud ;
+- une infrastructure souveraine reposant sur un mini PC équipé de Proxmox VE.
 
-### 4. Optimisation des transferts réseau
+Le recours à un VPS mutualisé permet de partager les ressources matérielles avec d'autres applications plutôt que de mobiliser un serveur dédié.
 
-- Les photos sont stockées directement sur le backend de stockage via l'API S3 —
-  aucun transit inutile par des couches intermédiaires
-- Next.js 16 intègre une optimisation automatique des images (compression, formats
-  WebP/AVIF) qui réduit la bande passante consommée
-- Le mode homelab permet de stocker les photos en local, éliminant tout transfert
-  réseau vers un datacenter distant
+L'infrastructure souveraine exploite un matériel déjà existant, évitant ainsi la création de nouvelles ressources matérielles dédiées.
 
-### 5. CI/CD sobre
+Cette approche permet de limiter l'empreinte environnementale globale du projet.
 
-Le pipeline GitLab CI est conçu pour minimiser les jobs inutiles :
-- Les jobs ne tournent que sur les branches concernées
-- Les images Docker sont construites en multi-stage pour minimiser leur taille
-- Le cache Docker est utilisé pour éviter de reconstruire les couches inchangées
+---
 
-## Comparaison d'impact
+## 2. Stack légère
 
-| Solution | Hébergement | Souveraineté | Empreinte |
-|---|---|---|---|
-| Google Photos | Datacenter Google | Aucune | Élevée |
-| iCloud | Datacenter Apple | Aucune | Élevée |
-| PhotoApp (mode cloud) | VPS mutualisé | Totale | Faible |
-| PhotoApp (mode homelab) | Matériel existant | Totale | Minimale |
+Les technologies retenues privilégient une faible consommation de ressources.
 
-## Veille technologique
+- **Drizzle ORM** : ORM léger, TypeScript-first, sans moteur externe.
+- **NestJS + Fastify** : architecture modulaire associée à un serveur HTTP performant et peu consommateur de mémoire.
+- **Garage** : stockage objet compatible S3 développé en Rust, optimisé pour les environnements auto-hébergés.
+- **Caddy** : reverse proxy léger intégrant automatiquement la gestion des certificats HTTPS.
 
-### Abandon de MinIO
-MinIO community edition est passé en maintenance mode en décembre 2025 et son
-repo GitHub a été archivé en février 2026. Garage a été retenu comme alternative
-car il est activement maintenu, plus léger, et conçu pour les déploiements
-self-hosted — ce qui est cohérent avec notre philosophie Green IT.
+---
 
-### Next.js 16 et Turbopack
-Next.js 16.2 intègre Turbopack stable qui réduit le temps de build de ~50% par
-rapport à Webpack. Moins de temps de build = moins de consommation CPU dans la CI.
+## 3. Réduction de la dépendance aux plateformes propriétaires
 
-### Docker multi-stage builds
-Les Dockerfiles utilisent des builds multi-stage pour produire des images finales
-sans outils de compilation — typiquement 10x plus légères qu'une image naïve.
+Le projet privilégie des solutions open source et auto-hébergeables.
 
-## Sources
+Les données utilisateur sont stockées dans une infrastructure maîtrisée par le propriétaire de l'application et ne dépendent pas d'un service de stockage propriétaire.
 
-- Collectif GreenIT : collectif.greenit.fr/ecoconception
-- RGAA Accessibilité : accessibilite.numerique.gouv.fr
-- Next.js 16.2 release notes : nextjs.org/blog
-- Garage object storage : garagehq.deuxfleurs.fr
-- InfoQ — MinIO maintenance mode : infoq.com
+Cette approche favorise :
+
+- la maîtrise des données ;
+- la pérennité de la solution ;
+- la réduction du risque de dépendance à un fournisseur unique.
+
+---
+
+## 4. Optimisation des transferts réseau
+
+Plusieurs optimisations permettent de limiter les transferts inutiles :
+
+- stockage des photos directement dans un service compatible S3 ;
+- optimisation automatique des images par Next.js ;
+- utilisation des formats modernes WebP et AVIF lorsque cela est possible ;
+- possibilité de stocker les données sur une infrastructure souveraine afin de limiter les échanges avec des centres de données distants.
+
+---
+
+## 5. Pipeline CI/CD optimisé
+
+Le projet utilise GitHub Actions pour automatiser les différentes étapes d'intégration continue.
+
+Le pipeline est conçu afin de limiter les traitements inutiles :
+
+- exécution automatique des tests ;
+- construction des images Docker uniquement lorsque nécessaire ;
+- utilisation du cache Docker ;
+- images Docker construites en multi-stage afin de réduire leur taille.
+
+---
+
+# Comparaison d'impact
+
+| Solution | Hébergement | Souveraineté | Empreinte estimée |
+|-----------|-------------|--------------|-------------------|
+| Google Photos | Datacenters Google | Faible | Élevée |
+| Apple Photos / iCloud | Datacenters Apple | Faible | Élevée |
+| Sovlens (mode cloud) | VPS mutualisé | Élevée | Faible |
+| Sovlens (mode souverain) | Infrastructure personnelle | Très élevée | Très faible |
+
+---
+
+# Veille technologique
+
+## Évolution des solutions de stockage objet
+
+Une veille technologique a été réalisée afin d'identifier une solution de stockage objet adaptée aux objectifs du projet.
+
+À la suite du passage de MinIO Community Edition en maintenance, plusieurs alternatives ont été étudiées.
+
+Garage a finalement été retenu grâce à :
+
+- sa compatibilité complète avec l'API Amazon S3 ;
+- son implémentation en Rust ;
+- sa faible consommation de ressources ;
+- son développement actif ;
+- son orientation vers les déploiements auto-hébergés.
+
+---
+
+## Next.js 16
+
+Les évolutions de Next.js ont également été suivies.
+
+L'utilisation de Turbopack permet d'accélérer les temps de compilation et de réduire les ressources consommées lors des phases de développement et d'intégration continue.
+
+---
+
+## Docker Multi-stage
+
+Les images Docker sont construites avec des Dockerfiles multi-stage.
+
+Cette approche permet :
+
+- de réduire la taille des images finales ;
+- de supprimer les dépendances de compilation inutiles ;
+- d'améliorer la sécurité ;
+- de diminuer les temps de déploiement.
+
+---
+
+# Conclusion
+
+Les travaux de veille réalisés ont permis de sélectionner une stack technique cohérente avec les objectifs de Sovlens :
+
+- privilégier des solutions open source ;
+- réduire la consommation de ressources ;
+- favoriser la souveraineté des données ;
+- limiter les dépendances aux plateformes de stockage propriétaires.
+
+L'utilisation d'une infrastructure souveraine associée à des technologies légères telles que Garage, Drizzle ORM, Fastify et Docker Swarm permet de proposer une solution performante tout en intégrant une démarche de sobriété numérique.
+
+---
+
+# Sources
+
+- https://collectif.greenit.fr
+- https://accessibilite.numerique.gouv.fr
+- https://nextjs.org/blog
+- https://garagehq.deuxfleurs.fr
+- https://www.infoq.com
+- https://www.postgresql.org
+- https://docs.docker.com

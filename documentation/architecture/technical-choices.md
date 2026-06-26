@@ -3,84 +3,258 @@
 ## Stack applicative
 
 ### Next.js 16 (Frontend)
-Next.js a été choisi pour son rendu hybride SSR/SSG natif, son optimisation automatique des images — critique pour une application photo — et son App Router qui simplifie la gestion des layouts et des routes protégées. Il évite d'avoir un serveur Node.js séparé pour le rendu, ce qui réduit l'empreinte infrastructure.
 
-### NestJS + Fastify (Backend)
-NestJS impose une architecture modulaire basée sur l'injection de dépendances, ce qui facilite l'implémentation des Design Patterns requis. Fastify remplace le transport HTTP par défaut d'Express pour de meilleures performances (~2x plus rapide). La combinaison NestJS + Fastify permet de générer la documentation Swagger/OpenAPI automatiquement via des décorateurs.
+Next.js 16 a été retenu pour développer l'interface utilisateur de Sovlens. Son App Router facilite l'organisation du projet et permet une séparation claire entre les différentes parties de l'application.
 
-### Drizzle ORM
-Drizzle a été préféré à Prisma pour sa légèreté (pas de moteur binaire embarqué), sa compatibilité TypeScript native et ses performances. Le schéma est défini en TypeScript pur, ce qui le rend versionnable et auditable directement dans le repo. Argument Green IT : moins de dépendances, moins de consommation mémoire.
+Le rendu hybride (SSR, SSG et Server Components) améliore les performances de l'application tout en optimisant le référencement lorsque cela est nécessaire.
 
-### PostgreSQL
-PostgreSQL a été choisi pour sa robustesse, son support natif du JSON (utile pour les métadonnées de photos EXIF), ses index performants sur les requêtes de recherche et sa compatibilité totale avec Drizzle. C'est la base de données relationnelle open source de référence.
-
-### Garage (stockage objet S3)
-MinIO a été écarté suite à son passage en maintenance mode en décembre 2025. Garage a été retenu comme alternative car il est écrit en Rust (performances, sécurité mémoire), distribué sous licence AGPLv3, compatible S3 à 100% et conçu pour les déploiements self-hosted légers. Il tourne sur une VM LXC Proxmox avec une consommation minimale de ressources.
+L'optimisation native des images constitue également un avantage important pour une application de gestion de photos, en réduisant automatiquement la bande passante consommée grâce à des formats modernes tels que WebP ou AVIF.
 
 ---
 
-## Infrastructure
+### NestJS 11 + Fastify (Backend)
 
-### Docker Compose + Caddy
-Kubernetes a été écarté au profit de Docker Compose pour ce projet mono-développeur. La complexité opérationnelle de K8s (manifests, Ingress, PVC) aurait consommé un temps disproportionné par rapport à la valeur ajoutée. Docker Compose offre la même reproductibilité avec une courbe d'apprentissage maîtrisée. Caddy remplace Nginx/Traefik grâce à sa gestion automatique des certificats HTTPS via Let's Encrypt — zéro configuration SSL.
+Le backend repose sur NestJS associé à Fastify.
 
-### GitLab CI/CD
-GitLab CI/CD a été choisi à la place de GitHub Actions car il intègre nativement la registry Docker, les environnements de staging et un pipeline YAML expressif. Tout est centralisé dans un seul outil — code, CI, registry, issues.
+NestJS apporte une architecture modulaire basée sur l'injection de dépendances, favorisant la séparation des responsabilités, la maintenabilité du code et l'application de Design Patterns.
 
-### Tailscale (VPN)
-Tailscale permet de créer un tunnel chiffré entre le VPS et le homelab Proxmox sans configuration firewall complexe. Il utilise le protocole WireGuard sous le capot. La version gratuite est suffisante pour ce projet.
+Fastify remplace Express comme moteur HTTP afin d'améliorer les performances et de réduire la consommation mémoire.
+
+Cette combinaison permet également de générer automatiquement une documentation OpenAPI (Swagger), facilitant les échanges entre le frontend et le backend.
 
 ---
 
-## Design Patterns
+### Drizzle ORM v1 RC + Drizzle Zod
 
-### Pattern Strategy (Storage Router)
-Le Storage Router implémente le pattern Strategy pour abstraire le backend de stockage. L'interface `IStorageProvider` définit le contrat (`upload`, `delete`, `getUrl`), et deux implémentations concrètes (`CloudStorageProvider`, `HomelabStorageProvider`) sont injectées dynamiquement selon la configuration utilisateur. Ce pattern permet d'ajouter de nouveaux backends de stockage sans modifier le code métier.
+Drizzle ORM a été choisi pour son approche **TypeScript-first**, son excellente intégration avec PostgreSQL et son faible coût d'exécution.
+
+Contrairement à certains ORM reposant sur un moteur externe, Drizzle s'appuie directement sur TypeScript, ce qui simplifie le versionnement du schéma de données et limite les dépendances.
+
+Le projet utilise également **Drizzle Zod** afin de générer automatiquement les schémas de validation à partir des modèles Drizzle.
+
+Cette approche permet :
+
+- d'éviter la duplication des modèles ;
+- de garantir la cohérence entre la validation et la base de données ;
+- d'améliorer la sécurité du typage ;
+- de simplifier la maintenance de l'application.
+
+---
+
+### PostgreSQL 18
+
+PostgreSQL constitue la base de données relationnelle de Sovlens.
+
+Il a été retenu pour :
+
+- sa robustesse ;
+- ses performances ;
+- son respect des standards SQL ;
+- sa parfaite compatibilité avec Drizzle ORM ;
+- ses fonctionnalités avancées en matière d'indexation et d'intégrité relationnelle.
+
+La base de données stocke uniquement les données métier de l'application :
+
+- utilisateurs ;
+- photos (métadonnées uniquement) ;
+- albums ;
+- profils de stockage ;
+- liens de partage.
+
+Les fichiers binaires des photos ne sont jamais enregistrés dans PostgreSQL. Ils sont stockés dans un service de stockage objet compatible S3.
+
+---
+
+### Garage (Stockage objet compatible S3)
+
+Garage est utilisé comme solution de stockage objet compatible S3.
+
+Selon le mode de stockage choisi par l'utilisateur, l'application communique soit avec :
+
+- une instance Garage hébergée sur le VPS ;
+- une instance Garage auto-hébergée sur une infrastructure souveraine (mini PC Proxmox).
+
+L'utilisation d'une API S3 commune garantit un fonctionnement identique quel que soit l'emplacement physique des données.
+
+Garage a été retenu pour :
+
+- sa compatibilité avec l'API Amazon S3 ;
+- son implémentation en Rust ;
+- sa faible consommation de ressources ;
+- son orientation vers les déploiements auto-hébergés ;
+- son caractère open source.
+
+---
+
+# Infrastructure
+
+## Docker Swarm + Caddy
+
+Le projet est déployé sur un VPS à l'aide de Docker Swarm.
+
+Docker Swarm a été retenu afin de bénéficier d'une orchestration de conteneurs simple à administrer tout en restant proche d'une architecture de production.
+
+Il permet notamment :
+
+- le déploiement de plusieurs services ;
+- la gestion des réseaux ;
+- les mises à jour progressives ;
+- la réplication des services ;
+- une évolution possible vers plusieurs nœuds.
+
+Kubernetes n'a pas été retenu car il introduit une complexité importante (gestion des manifests, Ingress, Persistent Volumes, contrôleurs...) qui n'apporte pas de bénéfice significatif pour le périmètre de ce projet.
+
+Caddy est utilisé comme reverse proxy.
+
+Il gère automatiquement les certificats HTTPS via Let's Encrypt, réduisant fortement la configuration nécessaire tout en améliorant la sécurité.
+
+---
+
+## GitHub Actions
+
+L'intégration continue et le déploiement continu sont assurés par GitHub Actions.
+
+Le pipeline automatise notamment :
+
+- l'analyse du code ;
+- l'exécution des tests ;
+- la construction des images Docker ;
+- la publication dans le registre de conteneurs ;
+- le déploiement sur le VPS.
+
+Les images Docker produites par le pipeline sont ensuite utilisées pour mettre à jour automatiquement les services déployés avec Docker Swarm.
+
+---
+
+## Réseau privé sécurisé
+
+Le mode de stockage souverain nécessite une communication sécurisée entre le VPS hébergeant l'application et l'infrastructure souveraine de l'utilisateur.
+
+Une solution de réseau privé basée sur WireGuard est retenue afin de sécuriser les échanges sans exposer directement l'infrastructure sur Internet.
+
+Dans le cadre de ce projet, cette solution est implémentée avec **Tailscale**, choisi pour sa simplicité de déploiement, sa sécurité et son intégration transparente avec WireGuard.
+
+---
+
+# Design Patterns
+
+## Strategy Pattern (Storage Router)
+
+La Killer Feature de Sovlens repose sur le **Strategy Pattern**.
+
+Une interface commune définit les opérations de stockage :
 
 ```typescript
 interface IStorageProvider {
-  upload(file: Buffer, filename: string): Promise<string>
-  delete(filename: string): Promise<void>
-  getUrl(filename: string): string
+  upload(file: Buffer, filename: string): Promise<string>;
+  delete(filename: string): Promise<void>;
+  getUrl(filename: string): string;
 }
 ```
 
-### Pattern Singleton (Configuration)
-Le module de configuration NestJS (`ConfigModule`) est instancié en Singleton — une seule instance partagée dans toute l'application. Cela garantit que la configuration (mode storage, credentials) est lue une seule fois au démarrage.
+Deux implémentations sont actuellement prévues :
 
-### Pattern Observer (Événements)
-Le module d'événements NestJS (`EventEmitter2`) est utilisé pour notifier les modules intéressés lors d'un upload photo (ex: génération de miniature, mise à jour des métriques Prometheus). Les modules s'abonnent aux événements sans couplage direct.
+- `CloudStorageProvider`
+- `SovereignStorageProvider`
+
+Le `StorageService` sélectionne dynamiquement la stratégie adaptée en fonction du profil de stockage de l'utilisateur.
+
+Cette architecture permet d'ajouter ultérieurement de nouveaux fournisseurs compatibles S3 sans modifier le reste de l'application.
 
 ---
 
-## Base de données — schéma simplifié
+## Singleton Pattern
 
-```
+Le module de configuration de NestJS est utilisé sous forme de Singleton.
+
+Une seule instance est partagée dans toute l'application afin de centraliser :
+
+- la configuration JWT ;
+- la connexion PostgreSQL ;
+- les paramètres Garage ;
+- les variables d'environnement.
+
+---
+
+## Observer Pattern
+
+Le système d'événements de NestJS permet de déclencher automatiquement différents traitements après certaines actions importantes.
+
+Par exemple :
+
+- génération de miniatures ;
+- mise à jour des métriques Prometheus ;
+- journalisation ;
+- traitements asynchrones futurs.
+
+Cette approche réduit le couplage entre les différents modules de l'application.
+
+---
+
+# Base de données — Schéma simplifié
+
+```text
 users
-  id, email, password_hash, created_at
+  id
+  email
+  password_hash
+  created_at
 
 photos
-  id, user_id, filename, url, storage_mode, size, created_at
+  id
+  user_id
+  filename
+  object_key
+  storage_mode (cloud | souverain)
+  size
+  created_at
 
 albums
-  id, user_id, name, created_at
+  id
+  user_id
+  name
+  created_at
 
 album_photos
-  album_id, photo_id
+  album_id
+  photo_id
 
-storage_config
-  user_id, mode (cloud|homelab), endpoint, access_key, secret_key
+storage_profiles
+  id
+  user_id
+  mode
+  endpoint
+  bucket
+
+share_links
+  id
+  photo_id
+  album_id
+  token
+  expires_at
 ```
 
 ---
 
-## Choix écartés
+# Choix techniques écartés
 
-| Technologie | Raison d'exclusion |
-|---|---|
-| Prisma | Moteur binaire lourd, moins performant que Drizzle |
-| MinIO | Passage en maintenance mode décembre 2025 |
-| Kubernetes / K3s | Complexité opérationnelle disproportionnée pour un projet solo |
-| GitHub Actions | Moins intégré que GitLab CI pour notre workflow |
-| Nginx | Configuration SSL manuelle, moins simple que Caddy |
-| Cloudflare R2 | Nécessite un compte externe, contraire à la philosophie souveraineté |
+| Technologie | Justification |
+|-------------|---------------|
+| Prisma | Drizzle ORM offre une approche plus légère, TypeScript-first et évite l'utilisation d'un moteur binaire externe. |
+| MinIO | Garage est mieux adapté à une infrastructure auto-hébergée légère tout en offrant une compatibilité complète avec l'API S3. |
+| Kubernetes | Solution très complète mais plus complexe à administrer. Docker Swarm répond aux besoins du projet avec une mise en œuvre plus simple. |
+| Nginx | Caddy automatise entièrement la gestion des certificats HTTPS et réduit fortement la configuration nécessaire. |
+| Cloudflare R2 | Le projet privilégie une maîtrise complète du stockage des données grâce à une infrastructure souveraine basée sur Garage. |
+
+---
+
+# Conclusion
+
+Les choix techniques retenus pour Sovlens répondent à quatre objectifs principaux :
+
+- proposer une architecture moderne, modulaire et fortement typée grâce à TypeScript ;
+- privilégier des solutions open source ;
+- garantir la souveraineté des données grâce à un stockage compatible S3 pouvant être auto-hébergé ;
+- conserver une infrastructure simple à déployer, sécurisée et facilement maintenable.
+
+Le **Strategy Pattern** constitue le cœur de la Killer Feature du projet. Il permet de basculer dynamiquement entre un stockage cloud hébergé sur un VPS et un stockage souverain compatible S3, auto-hébergé sur l'infrastructure de l'utilisateur, sans modifier la logique métier de l'application.
