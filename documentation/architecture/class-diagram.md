@@ -19,7 +19,6 @@ classDiagram
     +uuid id
     +string email
     +string passwordHash
-    +UserRole role
     +datetime createdAt
     +datetime updatedAt
   }
@@ -52,8 +51,8 @@ classDiagram
   class ShareLink {
     +uuid id
     +uuid userId
-    +uuid photoId
-    +uuid albumId
+    +uuid? photoId
+    +uuid? albumId
     +string token
     +datetime expiresAt
     +datetime createdAt
@@ -125,12 +124,6 @@ classDiagram
     +getUrl(objectKey)
   }
 
-  class UserRole {
-    <<enumeration>>
-    USER
-    ADMIN
-  }
-
   class StorageMode {
     <<enumeration>>
     CLOUD
@@ -141,7 +134,6 @@ classDiagram
   User "1" --> "*" Album
   User "1" --> "*" ShareLink
   User "1" --> "1" StorageProfile
-  User --> UserRole
 
   Album "*" --> "*" Photo : AlbumPhoto
   AlbumPhoto --> Album
@@ -184,8 +176,7 @@ Un utilisateur peut :
 - posséder plusieurs photos ;
 - créer plusieurs albums ;
 - générer plusieurs liens de partage ;
-- posséder un profil de stockage ;
-- avoir un rôle utilisateur ou administrateur.
+- posséder un profil de stockage.
 
 ### Photos
 
@@ -212,9 +203,11 @@ La relation entre `Album` et `Photo` est une relation plusieurs-à-plusieurs. El
 Un lien de partage contient :
 
 - un token unique ;
-- une ressource ciblée ;
+- une ressource ciblée, photo ou album ;
 - une date d'expiration optionnelle ;
 - une date de création.
+
+Les champs `photoId` et `albumId` sont optionnels car un lien de partage cible soit une photo, soit un album.
 
 ### Profil de stockage
 
