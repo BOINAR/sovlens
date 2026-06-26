@@ -28,24 +28,46 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/RegisterRequest"
+            examples:
+              valid:
+                value:
+                  email: user@sovlens.local
+                  password: Password123!
       responses:
         "201":
           description: Compte créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
         "400":
           description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: Email déjà utilisé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /auth/login:
     post:
       tags: [Auth]
-      summary: Connexion utilisateur
+      summary: Connecter un utilisateur
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/LoginRequest"
+            examples:
+              valid:
+                value:
+                  email: user@sovlens.local
+                  password: Password123!
       responses:
         "200":
           description: Authentification réussie
@@ -53,8 +75,107 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Identifiants invalides
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Rafraîchir le token d'accès
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: Nouveau token généré
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Refresh token invalide ou expiré
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Déconnecter l'utilisateur
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Déconnexion réussie
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Demander une réinitialisation du mot de passe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordRequest"
+            examples:
+              valid:
+                value:
+                  email: user@sovlens.local
+      responses:
+        "200":
+          description: Email de réinitialisation envoyé si le compte existe
+        "400":
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: Réinitialiser le mot de passe avec un jeton
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequest"
+            examples:
+              valid:
+                value:
+                  token: reset-token-example
+                  password: NewPassword123!
+      responses:
+        "204":
+          description: Mot de passe réinitialisé
+        "400":
+          description: Jeton invalide, expiré ou mot de passe invalide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /users/me:
     get:
@@ -64,18 +185,55 @@ paths:
         - bearerAuth: []
       responses:
         "200":
-          description: Profil utilisateur
+          description: Profil utilisateur connecté
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
         "401":
           description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users/me/password:
+    patch:
+      tags: [Users]
+      summary: Modifier le mot de passe de l'utilisateur connecté
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePasswordRequest"
+            examples:
+              valid:
+                value:
+                  currentPassword: Password123!
+                  newPassword: NewPassword123!
+      responses:
+        "204":
+          description: Mot de passe modifié
+        "400":
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Non authentifié ou mot de passe actuel incorrect
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /photos:
     get:
       tags: [Photos]
-      summary: Lister les photos de l'utilisateur
+      summary: Lister les photos de l'utilisateur connecté
       security:
         - bearerAuth: []
       responses:
@@ -87,6 +245,12 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Photo"
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
     post:
       tags: [Photos]
@@ -99,8 +263,7 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              required:
-                - file
+              required: [file]
               properties:
                 file:
                   type: string
@@ -114,8 +277,22 @@ paths:
                 $ref: "#/components/schemas/Photo"
         "400":
           description: Fichier invalide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "413":
-          description: Fichier supérieur à 10 MB
+          description: Fichier supérieur à 10 Mo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /photos/{id}:
     get:
@@ -132,8 +309,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Photo"
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Accès refusé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: Photo introuvable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
     delete:
       tags: [Photos]
@@ -145,13 +338,29 @@ paths:
       responses:
         "204":
           description: Photo supprimée
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Accès refusé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: Photo introuvable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /albums:
     get:
       tags: [Albums]
-      summary: Lister les albums
+      summary: Lister les albums de l'utilisateur connecté
       security:
         - bearerAuth: []
       responses:
@@ -163,6 +372,12 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Album"
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
     post:
       tags: [Albums]
@@ -175,9 +390,137 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/CreateAlbumRequest"
+            examples:
+              valid:
+                value:
+                  name: Vacances
       responses:
         "201":
           description: Album créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Album"
+        "400":
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /albums/{id}:
+    get:
+      tags: [Albums]
+      summary: Récupérer un album
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/AlbumId"
+      responses:
+        "200":
+          description: Détail d'un album
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Album"
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Accès refusé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Album introuvable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    patch:
+      tags: [Albums]
+      summary: Modifier un album
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/AlbumId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAlbumRequest"
+      responses:
+        "200":
+          description: Album modifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Album"
+        "400":
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Accès refusé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Album introuvable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      tags: [Albums]
+      summary: Supprimer un album
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/AlbumId"
+      responses:
+        "204":
+          description: Album supprimé
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Accès refusé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Album introuvable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /albums/{id}/photos:
     post:
@@ -192,24 +535,84 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - photoId
-              properties:
-                photoId:
-                  type: string
+              $ref: "#/components/schemas/AddPhotoToAlbumRequest"
       responses:
         "200":
           description: Photo ajoutée à l'album
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Album"
+        "400":
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Accès refusé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Album ou photo introuvable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /albums/{id}/photos/{photoId}:
+    delete:
+      tags: [Albums]
+      summary: Retirer une photo d'un album
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/AlbumId"
+        - $ref: "#/components/parameters/PhotoIdAsPhotoId"
+      responses:
+        "204":
+          description: Photo retirée de l'album
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Accès refusé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Album ou photo introuvable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /sharing/photos/{id}:
     post:
       tags: [Sharing]
-      summary: Créer un lien public de partage
+      summary: Créer un lien public de partage pour une photo
       security:
         - bearerAuth: []
       parameters:
         - $ref: "#/components/parameters/PhotoId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateShareLinkRequest"
       responses:
         "201":
           description: Lien de partage créé
@@ -217,6 +620,84 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ShareLink"
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Accès refusé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Photo introuvable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /sharing/albums/{id}:
+    post:
+      tags: [Sharing]
+      summary: Créer un lien public de partage pour un album
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/AlbumId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateShareLinkRequest"
+      responses:
+        "201":
+          description: Lien de partage créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShareLink"
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Accès refusé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Album introuvable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /shared/{token}:
+    get:
+      tags: [Sharing]
+      summary: Accéder à une ressource partagée publiquement
+      parameters:
+        - $ref: "#/components/parameters/ShareToken"
+      responses:
+        "200":
+          description: Ressource partagée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedResource"
+        "404":
+          description: Lien introuvable ou expiré
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /storage/config:
     get:
@@ -231,10 +712,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/StorageConfig"
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
     patch:
       tags: [Storage]
-      summary: Modifier le fournisseur de stockage
+      summary: Modifier la configuration de stockage
       security:
         - bearerAuth: []
       requestBody:
@@ -246,8 +733,22 @@ paths:
       responses:
         "200":
           description: Configuration mise à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageConfig"
         "400":
           description: Configuration invalide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
 components:
   securitySchemes:
@@ -263,9 +764,26 @@ components:
       required: true
       schema:
         type: string
+        format: uuid
+
+    PhotoIdAsPhotoId:
+      name: photoId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
 
     AlbumId:
       name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    ShareToken:
+      name: token
       in: path
       required: true
       schema:
@@ -274,9 +792,7 @@ components:
   schemas:
     RegisterRequest:
       type: object
-      required:
-        - email
-        - password
+      required: [email, password]
       properties:
         email:
           type: string
@@ -287,9 +803,7 @@ components:
 
     LoginRequest:
       type: object
-      required:
-        - email
-        - password
+      required: [email, password]
       properties:
         email:
           type: string
@@ -297,19 +811,59 @@ components:
         password:
           type: string
 
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+
+    ForgotPasswordRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+
+    ResetPasswordRequest:
+      type: object
+      required: [token, password]
+      properties:
+        token:
+          type: string
+        password:
+          type: string
+          minLength: 8
+
+    UpdatePasswordRequest:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+          minLength: 8
+
     AuthResponse:
       type: object
+      required: [accessToken, refreshToken, user]
       properties:
         accessToken:
+          type: string
+        refreshToken:
           type: string
         user:
           $ref: "#/components/schemas/User"
 
     User:
       type: object
+      required: [id, email, createdAt]
       properties:
         id:
           type: string
+          format: uuid
         email:
           type: string
           format: email
@@ -319,17 +873,31 @@ components:
 
     Photo:
       type: object
+      required:
+        - id
+        - filename
+        - mimeType
+        - objectKey
+        - url
+        - size
+        - storageMode
+        - createdAt
       properties:
         id:
           type: string
+          format: uuid
         filename:
+          type: string
+        mimeType:
           type: string
         objectKey:
           type: string
         url:
           type: string
+          description: URL d'accès générée par le backend
         size:
           type: integer
+          maximum: 10485760
         storageMode:
           type: string
           enum: [cloud, sovereign]
@@ -339,25 +907,56 @@ components:
 
     Album:
       type: object
+      required: [id, name, photos, createdAt]
       properties:
         id:
           type: string
+          format: uuid
         name:
           type: string
+        photos:
+          type: array
+          items:
+            $ref: "#/components/schemas/Photo"
         createdAt:
           type: string
           format: date-time
 
     CreateAlbumRequest:
       type: object
-      required:
-        - name
+      required: [name]
       properties:
         name:
           type: string
+          minLength: 1
+
+    UpdateAlbumRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+
+    AddPhotoToAlbumRequest:
+      type: object
+      required: [photoId]
+      properties:
+        photoId:
+          type: string
+          format: uuid
+
+    CreateShareLinkRequest:
+      type: object
+      properties:
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
 
     ShareLink:
       type: object
+      required: [token, url, createdAt]
       properties:
         token:
           type: string
@@ -366,31 +965,64 @@ components:
         expiresAt:
           type: string
           format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    SharedResource:
+      type: object
+      required: [type, resource]
+      properties:
+        type:
+          type: string
+          enum: [photo, album]
+        resource:
+          oneOf:
+            - $ref: "#/components/schemas/Photo"
+            - $ref: "#/components/schemas/Album"
 
     StorageConfig:
       type: object
+      required: [mode]
       properties:
         mode:
           type: string
           enum: [cloud, sovereign]
         endpoint:
           type: string
+          nullable: true
         bucket:
           type: string
+          nullable: true
 
     UpdateStorageConfigRequest:
       type: object
-      required:
-        - mode
+      required: [mode]
       properties:
         mode:
           type: string
           enum: [cloud, sovereign]
         endpoint:
           type: string
+          nullable: true
         accessKey:
           type: string
+          nullable: true
         secretKey:
           type: string
+          nullable: true
         bucket:
+          type: string
+          nullable: true
+
+    ErrorResponse:
+      type: object
+      required: [statusCode, message]
+      properties:
+        statusCode:
+          type: integer
+        message:
+          type: string
+        error:
           type: string

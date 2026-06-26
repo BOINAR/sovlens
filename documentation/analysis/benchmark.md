@@ -25,6 +25,7 @@ Les solutions étudiées sont :
 | Changement de stockage | ❌ | ❌ | ❌ | ✅ |
 | Partage de photos | ✅ | ✅ | ✅ | ✅ |
 | Albums | ✅ | ✅ | ✅ | ✅ |
+| Mot de passe oublié (email) | ✅ | ✅ | ✅ | ✅ |
 | API documentée | ❌ | ❌ | ✅ | ✅ |
 | Compatible S3 | ❌ | ❌ | ❌ | ✅ |
 | Expérience utilisateur | Excellente | Excellente | Bonne | Moderne |
@@ -103,6 +104,7 @@ Ces constats mettent en évidence une opportunité de proposer une solution conc
 Sovlens reprend les fonctionnalités essentielles d'une application moderne de gestion de photos :
 
 - authentification sécurisée ;
+- récupération de compte via un lien de réinitialisation envoyé par email ;
 - galerie de photos ;
 - gestion d'albums ;
 - partage par lien public.

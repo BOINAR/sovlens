@@ -4,7 +4,7 @@
 
 Les User Stories décrivent les besoins fonctionnels de Sovlens du point de vue des utilisateurs identifiés dans les personas.
 
-Chaque User Story est exprimée selon le format **Given / When / Then**, accompagnée de critères d'acceptation, d'une priorité **MoSCoW** et d'une estimation en **Story Points**.
+Chaque User Story est exprimée selon le format **Given / When / Then**, accompagnée de critères d'acceptation, d'une priorité **MoSCoW** et d'une estimation en **Story Points (SP)**.
 
 ---
 
@@ -53,6 +53,7 @@ Chaque User Story est exprimée selon le format **Given / When / Then**, accompa
 ### Critères d'acceptation
 
 - Génération d'un JWT.
+- Génération d'un Refresh Token.
 - Ouverture de la session utilisateur.
 
 **Priorité :** Must
@@ -61,7 +62,59 @@ Chaque User Story est exprimée selon le format **Given / When / Then**, accompa
 
 ---
 
-## US-03 — Upload d'une photo
+## US-03 — Modifier son mot de passe
+
+**En tant qu'**utilisateur,
+
+**Je souhaite** modifier mon mot de passe,
+
+**Afin de** renforcer la sécurité de mon compte.
+
+### Given / When / Then
+
+- **Given** que je suis authentifié.
+- **When** je saisis mon mot de passe actuel ainsi qu'un nouveau mot de passe valide.
+- **Then** mon mot de passe est mis à jour.
+
+### Critères d'acceptation
+
+- Vérification du mot de passe actuel.
+- Validation du nouveau mot de passe.
+- Mot de passe enregistré sous forme hachée.
+
+**Priorité :** Must
+
+**Story Points :** 3
+
+---
+
+## US-04 — Réinitialiser son mot de passe
+
+**En tant qu'**utilisateur,
+
+**Je souhaite** réinitialiser mon mot de passe,
+
+**Afin de** retrouver l'accès à mon compte lorsque je l'ai oublié.
+
+### Given / When / Then
+
+- **Given** que je ne peux plus me connecter.
+- **When** je demande une réinitialisation de mon mot de passe.
+- **Then** je reçois un email contenant un lien sécurisé permettant de définir un nouveau mot de passe.
+
+### Critères d'acceptation
+
+- Génération d'un jeton de réinitialisation.
+- Envoi d'un email contenant un lien sécurisé.
+- Expiration automatique du lien.
+
+**Priorité :** Must
+
+**Story Points :** 5
+
+---
+
+## US-05 — Upload d'une photo
 
 **En tant qu'**utilisateur,
 
@@ -87,7 +140,7 @@ Chaque User Story est exprimée selon le format **Given / When / Then**, accompa
 
 ---
 
-## US-04 — Consulter la galerie
+## US-06 — Consulter la galerie
 
 **En tant qu'**utilisateur,
 
@@ -112,7 +165,7 @@ Chaque User Story est exprimée selon le format **Given / When / Then**, accompa
 
 ---
 
-## US-05 — Gérer des albums
+## US-07 — Gérer des albums
 
 **En tant qu'**utilisateur,
 
@@ -138,7 +191,7 @@ Chaque User Story est exprimée selon le format **Given / When / Then**, accompa
 
 ---
 
-## US-06 — Partager une galerie
+## US-08 — Partager une galerie
 
 **En tant qu'**utilisateur,
 
@@ -166,7 +219,7 @@ Chaque User Story est exprimée selon le format **Given / When / Then**, accompa
 
 # Killer Feature
 
-## US-07 — Basculer vers un stockage souverain
+## US-09 — Basculer vers un stockage souverain
 
 **En tant qu'**utilisateur,
 
@@ -195,14 +248,16 @@ Chaque User Story est exprimée selon le format **Given / When / Then**, accompa
 # Priorisation MoSCoW
 
 | User Story | Priorité | Story Points |
-|------------|----------|--------------:|
+|------------|----------|-------------:|
 | US-01 | Must | 3 |
 | US-02 | Must | 3 |
-| US-03 | Must | 5 |
+| US-03 | Must | 3 |
 | US-04 | Must | 5 |
-| US-05 | Should | 5 |
-| US-06 | Should | 5 |
-| US-07 | Must | 8 |
+| US-05 | Must | 5 |
+| US-06 | Must | 5 |
+| US-07 | Should | 5 |
+| US-08 | Should | 5 |
+| US-09 | Must | 8 |
 
 ---
 
