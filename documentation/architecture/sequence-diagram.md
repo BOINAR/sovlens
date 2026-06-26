@@ -1,4 +1,4 @@
-# Diagramme de séquence — Killer Feature
+# Diagramme de séquence 
 
 ## Scénario 1 — Upload en mode cloud (par défaut)
 
