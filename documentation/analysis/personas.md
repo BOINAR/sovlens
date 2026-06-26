@@ -2,11 +2,11 @@
 
 ## Introduction
 
-Dans le cadre de la conception de Sovlens, deux personas ont été définis afin de représenter les principaux profils d'utilisateurs ciblés par l'application.
+Dans le cadre de la conception de **Sovlens**, deux personas ont été définis afin de représenter les principaux profils d'utilisateurs ciblés par l'application.
 
 Ces profils permettent de mieux comprendre les besoins des futurs utilisateurs, d'orienter les choix fonctionnels et de garantir que les fonctionnalités développées répondent à des cas d'usage concrets.
 
-Les personas serviront également de base à la rédaction des User Stories et à la conception des interfaces utilisateur.
+Les personas servent de référence pour la rédaction des **User Stories** et permettent de valider que les fonctionnalités proposées répondent aux besoins des utilisateurs ciblés.
 
 ---
 
@@ -81,16 +81,15 @@ Claire recherche une solution simple pour sauvegarder et organiser ses photos. E
 
 Claire crée un compte Sovlens et utilise dans un premier temps le stockage cloud proposé par l'application.
 
-Quelques mois plus tard, elle acquiert un mini PC préconfiguré avec le mode souverain. Depuis les paramètres de Sovlens, elle renseigne les informations de connexion de son stockage personnel et bascule simplement vers ce nouveau mode sans modifier ses habitudes d'utilisation.
+Quelques mois plus tard, elle acquiert un mini PC préconfiguré avec le mode souverain. Depuis les paramètres de Sovlens, elle renseigne les informations de connexion de son stockage personnel et bascule simplement vers ce nouveau mode, sans modifier ses habitudes d'utilisation.
 
 ---
 
 # Synthèse
 
-Les deux personas représentent les principaux profils ciblés par Sovlens.
+Les deux personas représentent les principaux profils d'utilisateurs visés par Sovlens.
 
-Thomas met en avant les besoins des utilisateurs souhaitant bénéficier d'une infrastructure auto-hébergée et d'une maîtrise complète de leurs données.
+- **Thomas** illustre les utilisateurs souhaitant bénéficier d'une infrastructure auto-hébergée et d'une maîtrise complète de leurs données.
+- **Claire** représente les utilisateurs recherchant avant tout une solution simple d'utilisation, tout en conservant la possibilité d'évoluer vers un stockage souverain.
 
-Claire représente les utilisateurs recherchant avant tout une solution simple d'utilisation, tout en conservant la possibilité d'évoluer vers un stockage souverain.
-
-Cette complémentarité justifie le choix d'une architecture reposant sur un système de stockage interchangeable permettant de basculer entre un stockage cloud classique et un stockage souverain sans modifier l'expérience utilisateur.
+Cette complémentarité justifie le choix d'une architecture reposant sur un système de stockage interchangeable, permettant de basculer entre un stockage cloud classique et un stockage souverain sans modifier l'expérience utilisateur.
