@@ -4,7 +4,7 @@
 
 Avant de sélectionner la fonctionnalité principale de Sovlens, plusieurs propositions ont été étudiées.
 
-Chaque fonctionnalité a été évaluée selon sa valeur ajoutée, sa faisabilité technique et son adéquation avec les objectifs du projet.
+Chaque proposition a été évaluée selon sa valeur ajoutée, sa faisabilité technique, son effort de réalisation et son adéquation avec les objectifs du projet.
 
 ---
 
@@ -32,7 +32,7 @@ Le changement s'effectue directement depuis les paramètres de l'application, sa
 
 | Opportunités | Menaces |
 |--------------|----------|
-| Répond aux enjeux de souveraineté numérique | Solutions similaires à venir |
+| Répond aux enjeux de souveraineté numérique | Apparition de solutions concurrentes similaires |
 
 ### Effort estimé
 
@@ -74,7 +74,7 @@ Moyen
 ### Dépendances
 
 - Calcul de hash
-- Base de données
+- Base de données PostgreSQL
 
 ---
 
@@ -96,7 +96,7 @@ Permettre de retrouver rapidement des photos grâce aux métadonnées EXIF (date
 
 | Opportunités | Menaces |
 |--------------|----------|
-| Amélioration de l'expérience utilisateur | Métadonnées parfois absentes |
+| Amélioration de l'expérience utilisateur | Métadonnées parfois absentes ou incomplètes |
 
 ### Effort estimé
 
@@ -104,18 +104,18 @@ Moyen
 
 ### Dépendances
 
-- Lecture EXIF
+- Lecture des métadonnées EXIF
 - PostgreSQL
 
 ---
 
 # Comparaison
 
-| Fonctionnalité | Faisabilité | Innovation | Valeur utilisateur |
-|---------------|------------:|-----------:|-------------------:|
-| Stockage souverain interchangeable | 9 | 10 | 10 |
-| Détection des doublons | 7 | 6 | 8 |
-| Recherche par métadonnées | 8 | 7 | 8 |
+| Fonctionnalité | Faisabilité | Innovation | Valeur utilisateur | Effort |
+|---------------|------------:|-----------:|-------------------:|---------|
+| Stockage souverain interchangeable | 9 | 10 | 10 | Élevé |
+| Détection automatique des doublons | 7 | 6 | 8 | Moyen |
+| Recherche intelligente par métadonnées | 8 | 7 | 8 | Moyen |
 
 ---
 
@@ -126,3 +126,5 @@ La fonctionnalité retenue est le **stockage souverain interchangeable**.
 Elle répond directement à l'objectif principal de Sovlens : offrir une alternative aux solutions de stockage propriétaires tout en laissant à l'utilisateur le contrôle du lieu d'hébergement de ses données.
 
 Cette fonctionnalité constitue le principal élément différenciant du projet et servira de base à l'architecture logicielle mise en œuvre.
+
+Elle oriente également les principaux choix de conception réalisés pour Sovlens, notamment le modèle de données, les diagrammes UML et l'architecture du service de stockage reposant sur le **Strategy Pattern**, permettant de sélectionner dynamiquement le fournisseur de stockage utilisé pour chaque utilisateur.
