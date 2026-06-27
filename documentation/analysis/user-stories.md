@@ -99,7 +99,7 @@ Chaque User Story est exprimée selon le format **Given / When / Then**, accompa
 ### Given / When / Then
 
 - **Given** que je ne peux plus me connecter.
-- **When** je demande une réinitialisation de mon mot de passe.
+- **When** je demande une réinitialisation.
 - **Then** je reçois un email contenant un lien sécurisé permettant de définir un nouveau mot de passe.
 
 ### Critères d'acceptation
@@ -120,19 +120,20 @@ Chaque User Story est exprimée selon le format **Given / When / Then**, accompa
 
 **Je souhaite** envoyer une photo,
 
-**Afin de** la sauvegarder.
+**Afin de** la sauvegarder dans mon espace personnel.
 
 ### Given / When / Then
 
 - **Given** que je suis connecté.
 - **When** je sélectionne une photo.
-- **Then** elle est enregistrée dans mon espace personnel.
+- **Then** elle est envoyée puis enregistrée dans mon espace personnel.
 
 ### Critères d'acceptation
 
 - Taille maximale : 10 Mo.
 - Formats de fichiers autorisés.
 - Confirmation de l'envoi.
+- La photo est stockée selon le mode de stockage configuré.
 
 **Priorité :** Must
 
@@ -140,7 +141,33 @@ Chaque User Story est exprimée selon le format **Given / When / Then**, accompa
 
 ---
 
-## US-06 — Consulter la galerie
+## US-06 — Télécharger une photo
+
+**En tant qu'**utilisateur,
+
+**Je souhaite** télécharger une photo,
+
+**Afin de** la conserver localement.
+
+### Given / When / Then
+
+- **Given** que je possède une photo.
+- **When** je clique sur **Télécharger**.
+- **Then** le fichier original est téléchargé sur mon appareil.
+
+### Critères d'acceptation
+
+- Téléchargement du fichier original.
+- Vérification des droits d'accès.
+- Compatible avec le stockage Cloud et le stockage souverain.
+
+**Priorité :** Must
+
+**Story Points :** 3
+
+---
+
+## US-07 — Consulter la galerie
 
 **En tant qu'**utilisateur,
 
@@ -165,7 +192,7 @@ Chaque User Story est exprimée selon le format **Given / When / Then**, accompa
 
 ---
 
-## US-07 — Gérer des albums
+## US-08 — Gérer des albums
 
 **En tant qu'**utilisateur,
 
@@ -191,7 +218,7 @@ Chaque User Story est exprimée selon le format **Given / When / Then**, accompa
 
 ---
 
-## US-08 — Partager une galerie
+## US-09 — Partager une photo ou un album
 
 **En tant qu'**utilisateur,
 
@@ -219,7 +246,7 @@ Chaque User Story est exprimée selon le format **Given / When / Then**, accompa
 
 # Killer Feature
 
-## US-09 — Basculer vers un stockage souverain
+## US-10 — Basculer vers un stockage souverain
 
 **En tant qu'**utilisateur,
 
@@ -254,10 +281,11 @@ Chaque User Story est exprimée selon le format **Given / When / Then**, accompa
 | US-03 | Must | 3 |
 | US-04 | Must | 5 |
 | US-05 | Must | 5 |
-| US-06 | Must | 5 |
-| US-07 | Should | 5 |
+| US-06 | Must | 3 |
+| US-07 | Must | 5 |
 | US-08 | Should | 5 |
-| US-09 | Must | 8 |
+| US-09 | Should | 5 |
+| US-10 | Must | 8 |
 
 ---
 

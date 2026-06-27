@@ -23,6 +23,8 @@ Les solutions étudiées sont :
 | Stockage cloud | ✅ | ✅ | ⚠️ (manuel) | ✅ |
 | Stockage souverain | ❌ | ❌ | ✅ | ✅ |
 | Changement de stockage | ❌ | ❌ | ❌ | ✅ |
+| Upload de photos | ✅ | ✅ | ✅ | ✅ |
+| Téléchargement des photos | ✅ | ✅ | ✅ | ✅ |
 | Partage de photos | ✅ | ✅ | ✅ | ✅ |
 | Albums | ✅ | ✅ | ✅ | ✅ |
 | Mot de passe oublié (email) | ✅ | ✅ | ✅ | ✅ |
@@ -40,8 +42,9 @@ Les solutions étudiées sont :
 ### Points forts
 
 - Interface très intuitive.
-- Excellente recherche.
-- Synchronisation automatique.
+- Synchronisation automatique des photos.
+- Recherche performante.
+- Téléchargement simple des photos.
 - Intégration avec l'écosystème Google.
 
 ### Limites
@@ -59,7 +62,8 @@ Les solutions étudiées sont :
 
 - Très bonne intégration avec l'écosystème Apple.
 - Synchronisation automatique.
-- Expérience utilisateur fluide sur les appareils Apple.
+- Téléchargement des photos sur les appareils Apple.
+- Expérience utilisateur fluide.
 
 ### Limites
 
@@ -77,6 +81,8 @@ Les solutions étudiées sont :
 - Auto-hébergeable.
 - Communauté active.
 - Interface moderne.
+- Téléchargement des photos.
+- API documentée.
 
 ### Limites
 
@@ -105,6 +111,8 @@ Sovlens reprend les fonctionnalités essentielles d'une application moderne de g
 
 - authentification sécurisée ;
 - récupération de compte via un lien de réinitialisation envoyé par email ;
+- upload de photos ;
+- téléchargement des photos ;
 - galerie de photos ;
 - gestion d'albums ;
 - partage par lien public.
@@ -112,6 +120,8 @@ Sovlens reprend les fonctionnalités essentielles d'une application moderne de g
 Le projet se différencie grâce à sa Killer Feature :
 
 - possibilité de basculer dynamiquement entre un stockage cloud et un stockage souverain compatible S3 directement depuis l'application.
+
+Contrairement aux solutions étudiées, Sovlens ne dépend pas d'un fournisseur d'identité externe (Google, Apple, Microsoft). L'application repose sur une authentification locale sécurisée (JWT + Refresh Token) afin de conserver une indépendance vis-à-vis des services tiers et de rester cohérente avec l'objectif de souveraineté des données.
 
 L'utilisateur conserve ainsi la même expérience d'utilisation tout en choisissant librement l'emplacement de stockage de ses données.
 
@@ -121,4 +131,4 @@ L'utilisateur conserve ainsi la même expérience d'utilisation tout en choisiss
 
 Le benchmark met en évidence que les solutions actuelles proposent une excellente expérience de gestion de photos, mais restent fortement liées à un mode de stockage imposé, qu'il soit propriétaire ou auto-hébergé.
 
-Sovlens se distingue par une architecture permettant de choisir librement le fournisseur de stockage sans modifier l'utilisation quotidienne de l'application. Cette capacité constitue la principale valeur ajoutée du projet.
+Sovlens se distingue par une architecture permettant de choisir librement le fournisseur de stockage, de rester indépendant des fournisseurs d'identité externes et de conserver une expérience utilisateur identique quel que soit le mode de stockage utilisé. Cette capacité constitue la principale valeur ajoutée du projet.

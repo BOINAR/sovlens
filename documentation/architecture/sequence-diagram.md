@@ -11,6 +11,7 @@ Les scénarios couverts sont :
 - upload d'une photo en mode cloud ;
 - activation du mode de stockage souverain ;
 - upload d'une photo en mode souverain ;
+- téléchargement d'une photo ;
 - partage public d'une photo ou d'un album.
 
 ---
@@ -31,7 +32,7 @@ sequenceDiagram
   B->>DB: Lecture du profil de stockage
   DB-->>B: Mode = CLOUD
   B->>GC: PUT objet S3
-  GC-->>B: URL de stockage
+  GC-->>B: Objet stocké
   B->>DB: INSERT des métadonnées
   B-->>F: 201 Created
   F-->>U: Photo ajoutée à la galerie
@@ -83,7 +84,7 @@ sequenceDiagram
   B->>DB: Lecture du profil de stockage
   DB-->>B: Mode = SOVEREIGN
   B->>GS: PUT objet S3
-  GS-->>B: URL de stockage
+  GS-->>B: Objet stocké
   B->>DB: INSERT des métadonnées
   B-->>F: 201 Created
   F-->>U: Photo ajoutée à la galerie
@@ -91,7 +92,30 @@ sequenceDiagram
 
 ---
 
-## Scénario 4 — Partage d'une photo ou d'un album
+## Scénario 4 — Téléchargement d'une photo
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'fontSize': '16px'}}}%%
+sequenceDiagram
+  actor U as Utilisateur
+  participant F as Frontend
+  participant B as Backend
+  participant DB as PostgreSQL
+  participant S as Stockage objet S3
+
+  U->>F: Clique sur « Télécharger »
+  F->>B: GET /photos/{id}/download
+  B->>DB: Vérifie les droits d'accès
+  DB-->>B: Photo autorisée + objectKey
+  B->>S: GET objet S3
+  S-->>B: Flux du fichier
+  B-->>F: 200 OK + fichier
+  F-->>U: Téléchargement de la photo
+```
+
+---
+
+## Scénario 5 — Partage d'une photo ou d'un album
 
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': {'fontSize': '16px'}}}%%
@@ -103,7 +127,7 @@ sequenceDiagram
   actor P as Destinataire
 
   U->>F: Clique sur « Partager »
-  F->>B: POST /share-links
+  F->>B: POST /sharing/photos/{id} ou /sharing/albums/{id}
   B->>DB: Vérifie la propriété de la ressource
   DB-->>B: Ressource autorisée
   B->>B: Génère un token unique
@@ -113,14 +137,16 @@ sequenceDiagram
 
   U-->>P: Transmet le lien
 
-  P->>B: GET /shared/:token
+  P->>B: GET /shared/{token}
   B->>DB: Recherche du lien de partage
   DB-->>B: Ressource trouvée
   B-->>P: Affiche la photo ou l'album partagé
 ```
 
-## Conclusion
+---
 
-Ces diagrammes présentent les principaux flux fonctionnels de Sovlens : l'upload d'une photo, l'activation du mode de stockage souverain, le stockage des fichiers selon le mode choisi et le partage public de photos ou d'albums.
+# Conclusion
 
-Ils montrent que le frontend interagit toujours avec la même API REST. Le backend se charge ensuite de sélectionner le fournisseur de stockage approprié et de gérer les traitements métier, garantissant une expérience utilisateur identique quel que soit le mode de stockage retenu.
+Ces diagrammes présentent les principaux flux fonctionnels de Sovlens : l'upload d'une photo, l'activation du mode de stockage souverain, le téléchargement d'une photo, le stockage des fichiers selon le mode choisi et le partage public de photos ou d'albums.
+
+Ils montrent que le frontend interagit toujours avec la même API REST. Le backend se charge de sélectionner le fournisseur de stockage approprié, de contrôler les droits d'accès, de gérer les traitements métier et de retourner les fichiers demandés, garantissant une expérience utilisateur identique quel que soit le mode de stockage retenu.

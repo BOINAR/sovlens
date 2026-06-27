@@ -31,7 +31,7 @@ paths:
             examples:
               valid:
                 value:
-                  email: user@sovlens.local
+                  email: thomas.martin@example.com
                   password: Password123!
       responses:
         "201":
@@ -66,7 +66,7 @@ paths:
             examples:
               valid:
                 value:
-                  email: user@sovlens.local
+                  email: thomas.martin@example.com
                   password: Password123!
       responses:
         "200":
@@ -141,7 +141,7 @@ paths:
             examples:
               valid:
                 value:
-                  email: user@sovlens.local
+                  email: thomas.martin@example.com
       responses:
         "200":
           description: Email de réinitialisation envoyé si le compte existe
@@ -254,7 +254,7 @@ paths:
 
     post:
       tags: [Photos]
-      summary: Importer une photo
+      summary: Upload d'une photo
       security:
         - bearerAuth: []
       requestBody:
@@ -270,7 +270,7 @@ paths:
                   format: binary
       responses:
         "201":
-          description: Photo importée
+          description: Photo envoyée
           content:
             application/json:
               schema:
@@ -357,6 +357,41 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /photos/{id}/download:
+    get:
+      tags: [Photos]
+      summary: Télécharger une photo
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PhotoId"
+      responses:
+        "200":
+          description: Fichier téléchargé
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "401":
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Accès refusé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Photo introuvable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /albums:
     get:
       tags: [Albums]
@@ -393,7 +428,7 @@ paths:
             examples:
               valid:
                 value:
-                  name: Vacances
+                  name: Vacances été 2026
       responses:
         "201":
           description: Album créé
