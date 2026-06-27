@@ -1,7 +1,16 @@
-import { integer, pgTable, varchar } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+
 export const usersTable = pgTable('users', {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  firstname: varchar({ length: 255 }).notNull(),
-  lastname: varchar({ length: 255 }).notNull(),
-  email: varchar({ length: 255 }).notNull().unique(),
+  id: uuid('id').primaryKey().defaultRandom(),
+
+  email: text('email').notNull().unique(),
+  passwordHash: text('password_hash').notNull(),
+
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
