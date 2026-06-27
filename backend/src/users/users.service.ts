@@ -1,49 +1,56 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { DRIZZLE, DbClient } from 'src/db/drizzle.provider';
-import { usersTable } from './users.schema';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { UsersRepository } from './users.repository';
 import { CreateUserInput, UpdateUserInput } from './users.validation';
-import { eq } from 'drizzle-orm';
 
 @Injectable()
 export class UsersService {
-  constructor(@Inject(DRIZZLE) private readonly db: DbClient) {}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
   async create(data: CreateUserInput) {
-    const user = await this.db.insert(usersTable).values(data).returning();
+    const existingUser = await this.usersRepository.findByEmail(data.email);
 
-    return user[0];
+    if (existingUser) {
+      throw new ConflictException('Un utilisateur existe déjà avec cet email');
+    }
+
+    return this.usersRepository.create(data);
   }
 
-  async findAll() {
-    const users = await this.db.select().from(usersTable);
+  async findById(id: string) {
+    const user = await this.usersRepository.findById(id);
 
-    console.log('users', users);
+    if (!user) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
 
-    return users;
+    return user;
   }
 
-  async findOne(id: number) {
-    const user = await this.db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.id, id));
-    return user[0];
+  async findByEmail(email: string) {
+    return this.usersRepository.findByEmail(email);
   }
 
-  async update(id: number, data: UpdateUserInput) {
-    const user = await this.db
-      .update(usersTable)
-      .set(data)
-      .where(eq(usersTable.id, id))
-      .returning();
-    return user[0];
+  async update(id: string, data: UpdateUserInput) {
+    const user = await this.usersRepository.update(id, data);
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
+
+    return user;
   }
 
-  async remove(id: number) {
-    const user = await this.db
-      .delete(usersTable)
-      .where(eq(usersTable.id, id))
-      .returning();
+  async updatePassword(id: string, passwordHash: string) {
+    const user = await this.usersRepository.updatePassword(id, passwordHash);
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
+
     return user;
   }
 }
