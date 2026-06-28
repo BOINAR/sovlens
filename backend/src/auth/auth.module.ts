@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller';
@@ -7,6 +7,7 @@ import { AuthRepository } from './auth.repository';
 import { UsersModule } from '../users/users.module';
 import { DbModule } from '../db/drizzle.module';
 
+@Global()
 @Module({
   imports: [
     DbModule,
