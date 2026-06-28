@@ -5,8 +5,9 @@ import { DbModule } from 'src/db/drizzle.module';
 import { UsersRepository } from './users.repository';
 
 @Module({
-  imports: [DbModule], 
+  imports: [DbModule],
   controllers: [UsersController],
   providers: [UsersService, UsersRepository],
+  exports: [UsersService],
 })
 export class UsersModule {}
