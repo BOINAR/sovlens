@@ -9,5 +9,6 @@ import { PhotosModule } from '../photos/photos.module';
   imports: [DbModule, PhotosModule],
   controllers: [AlbumsController],
   providers: [AlbumsService, AlbumsRepository],
+  exports: [AlbumsRepository],
 })
 export class AlbumsModule {}

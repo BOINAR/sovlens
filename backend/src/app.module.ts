@@ -10,6 +10,7 @@ import { StorageModule } from './storage/storage.module';
 import { PhotosModule } from './photos/photos.module';
 import { AlbumsModule } from './albums/albums.module';
 import { StorageConfigModule } from './storage-config/storage-config.module';
+import { SharingModule } from './sharing/sharing.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { StorageConfigModule } from './storage-config/storage-config.module';
     PhotosModule,
     AlbumsModule,
     StorageConfigModule,
+    SharingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
