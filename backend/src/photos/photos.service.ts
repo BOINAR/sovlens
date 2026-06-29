@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PhotosRepository } from './photos.repository';
 import { StorageService } from '../storage/storage.service';
+import { StorageConfigRepository } from '../storage-config/storage-config.repository';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -13,7 +14,13 @@ export class PhotosService {
   constructor(
     private readonly photosRepository: PhotosRepository,
     private readonly storageService: StorageService,
+    private readonly storageConfigRepository: StorageConfigRepository,
   ) {}
+
+  private async getProvider(userId: string) {
+    const profile = await this.storageConfigRepository.findByUserId(userId);
+    return this.storageService.getProvider(profile ?? undefined);
+  }
 
   async upload(
     userId: string,
@@ -23,7 +30,7 @@ export class PhotosService {
     size: number,
   ) {
     const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    const MAX_SIZE = 10 * 1024 * 1024;
 
     if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
       throw new BadRequestException('Format non supporté');
@@ -33,11 +40,14 @@ export class PhotosService {
       throw new BadRequestException('La photo ne doit pas dépasser 10MB');
     }
 
-    // Génère une clé unique pour S3 — on préfixe avec l'userId pour organiser les fichiers
+    const profile = await this.storageConfigRepository.findByUserId(userId);
+    const provider = this.storageService.getProvider(profile ?? undefined);
+    const storageMode = profile?.mode === 'sovereign' ? 'sovereign' : 'cloud';
+
     const extension = originalName.split('.').pop();
     const objectKey = `${userId}/${randomUUID()}.${extension}`;
 
-    await this.storageService.upload(file, objectKey, mimeType);
+    await provider.upload(file, objectKey, mimeType);
 
     const photo = await this.photosRepository.create({
       userId,
@@ -46,35 +56,36 @@ export class PhotosService {
       mimeType,
       size,
       objectKey,
-      storageMode: 'cloud',
+      storageMode,
     });
 
     return photo;
   }
-  
+
   async download(userId: string, photoId: string) {
-  const photo = await this.photosRepository.findById(photoId);
+    const photo = await this.photosRepository.findById(photoId);
 
-  if (!photo) {
-    throw new NotFoundException('Photo introuvable');
+    if (!photo) {
+      throw new NotFoundException('Photo introuvable');
+    }
+
+    if (photo.userId !== userId) {
+      throw new ForbiddenException('Accès refusé');
+    }
+
+    const provider = await this.getProvider(userId);
+    const stream = await provider.getStream(photo.objectKey);
+    return { stream, photo };
   }
-
-  if (photo.userId !== userId) {
-    throw new ForbiddenException('Accès refusé');
-  }
-
-  const stream = await this.storageService.getStream(photo.objectKey);
-  return { stream, photo };
-}
 
   async findAll(userId: string) {
     const photos = await this.photosRepository.findAllByUserId(userId);
+    const provider = await this.getProvider(userId);
 
-    // Génère une URL signée pour chaque photo
     const photosWithUrls = await Promise.all(
       photos.map(async (photo) => ({
         ...photo,
-        url: await this.storageService.getSignedUrl(photo.objectKey),
+        url: await provider.getSignedUrl(photo.objectKey),
       })),
     );
 
@@ -92,7 +103,8 @@ export class PhotosService {
       throw new ForbiddenException('Accès refusé');
     }
 
-    const url = await this.storageService.getSignedUrl(photo.objectKey);
+    const provider = await this.getProvider(userId);
+    const url = await provider.getSignedUrl(photo.objectKey);
     return { ...photo, url };
   }
 
@@ -107,7 +119,8 @@ export class PhotosService {
       throw new ForbiddenException('Accès refusé');
     }
 
-    await this.storageService.delete(photo.objectKey);
+    const provider = await this.getProvider(userId);
+    await provider.delete(photo.objectKey);
     await this.photosRepository.delete(photoId);
 
     return { message: 'Photo supprimée avec succès' };

@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { StorageModule } from './storage/storage.module';
 import { PhotosModule } from './photos/photos.module';
 import { AlbumsModule } from './albums/albums.module';
+import { StorageConfigModule } from './storage-config/storage-config.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { AlbumsModule } from './albums/albums.module';
     StorageModule,
     PhotosModule,
     AlbumsModule,
+    StorageConfigModule,
   ],
   controllers: [AppController],
   providers: [AppService],

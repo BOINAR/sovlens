@@ -14,8 +14,9 @@ export interface IStorageProvider {
   getStream(key: string): Promise<unknown>;
 }
 
-@Injectable()
-export class StorageService implements IStorageProvider {
+// ─── Cloud Provider ───────────────────────────────────────────────────────────
+
+export class CloudStorageProvider implements IStorageProvider {
   private client: S3Client;
   private bucket: string;
 
@@ -31,7 +32,6 @@ export class StorageService implements IStorageProvider {
       requestChecksumCalculation: 'WHEN_REQUIRED',
       responseChecksumValidation: 'WHEN_REQUIRED',
     });
-
     this.bucket = process.env.S3_BUCKET!;
   }
 
@@ -49,18 +49,12 @@ export class StorageService implements IStorageProvider {
 
   async delete(key: string): Promise<void> {
     await this.client.send(
-      new DeleteObjectCommand({
-        Bucket: this.bucket,
-        Key: key,
-      }),
+      new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
     );
   }
 
   async getSignedUrl(key: string): Promise<string> {
-    const command = new GetObjectCommand({
-      Bucket: this.bucket,
-      Key: key,
-    });
+    const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
     return getSignedUrl(this.client, command, {
       expiresIn: 3600,
       signableHeaders: new Set(['host']),
@@ -68,11 +62,115 @@ export class StorageService implements IStorageProvider {
   }
 
   async getStream(key: string): Promise<unknown> {
-    const command = new GetObjectCommand({
-      Bucket: this.bucket,
-      Key: key,
-    });
+    const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
     const response = await this.client.send(command);
     return response.Body;
+  }
+}
+
+// ─── Sovereign Provider ───────────────────────────────────────────────────────
+
+export class SovereignStorageProvider implements IStorageProvider {
+  private client: S3Client;
+  private bucket: string;
+
+  constructor(endpoint: string, accessKey: string, secretKey: string, bucket: string) {
+    this.client = new S3Client({
+      endpoint,
+      region: 'garage',
+      credentials: {
+        accessKeyId: accessKey,
+        secretAccessKey: secretKey,
+      },
+      forcePathStyle: true,
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
+    });
+    this.bucket = bucket;
+  }
+
+  async upload(file: Buffer, key: string, mimeType: string): Promise<string> {
+    await this.client.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        Body: file,
+        ContentType: mimeType,
+      }),
+    );
+    return key;
+  }
+
+  async delete(key: string): Promise<void> {
+    await this.client.send(
+      new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
+    );
+  }
+
+  async getSignedUrl(key: string): Promise<string> {
+    const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
+    return getSignedUrl(this.client, command, {
+      expiresIn: 3600,
+      signableHeaders: new Set(['host']),
+    });
+  }
+
+  async getStream(key: string): Promise<unknown> {
+    const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
+    const response = await this.client.send(command);
+    return response.Body;
+  }
+}
+
+// ─── Storage Service (Strategy Router) ───────────────────────────────────────
+
+@Injectable()
+export class StorageService {
+  private cloudProvider: CloudStorageProvider;
+
+  constructor() {
+    this.cloudProvider = new CloudStorageProvider();
+  }
+
+  // Retourne le bon provider selon le profil de stockage
+  getProvider(storageProfile?: {
+    mode: string;
+    endpoint?: string | null;
+    accessKey?: string | null;
+    secretKey?: string | null;
+    bucket?: string | null;
+  }): IStorageProvider {
+    if (
+      storageProfile?.mode === 'sovereign' &&
+      storageProfile.endpoint &&
+      storageProfile.accessKey &&
+      storageProfile.secretKey &&
+      storageProfile.bucket
+    ) {
+      return new SovereignStorageProvider(
+        storageProfile.endpoint,
+        storageProfile.accessKey,
+        storageProfile.secretKey,
+        storageProfile.bucket,
+      );
+    }
+    return this.cloudProvider;
+  }
+
+  // Méthodes de commodité qui utilisent le cloud par défaut
+  async upload(file: Buffer, key: string, mimeType: string): Promise<string> {
+    return this.cloudProvider.upload(file, key, mimeType);
+  }
+
+  async delete(key: string): Promise<void> {
+    return this.cloudProvider.delete(key);
+  }
+
+  async getSignedUrl(key: string): Promise<string> {
+    return this.cloudProvider.getSignedUrl(key);
+  }
+
+  async getStream(key: string): Promise<unknown> {
+    return this.cloudProvider.getStream(key);
   }
 }
