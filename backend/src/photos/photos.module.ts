@@ -9,5 +9,6 @@ import { StorageModule } from '../storage/storage.module';
   imports: [DbModule, StorageModule],
   controllers: [PhotosController],
   providers: [PhotosService, PhotosRepository],
+  exports: [PhotosRepository],
 })
 export class PhotosModule {}

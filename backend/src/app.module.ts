@@ -8,6 +8,7 @@ import { DbModule } from './db/drizzle.module';
 import { AuthModule } from './auth/auth.module';
 import { StorageModule } from './storage/storage.module';
 import { PhotosModule } from './photos/photos.module';
+import { AlbumsModule } from './albums/albums.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PhotosModule } from './photos/photos.module';
     AuthModule,
     StorageModule,
     PhotosModule,
+    AlbumsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
