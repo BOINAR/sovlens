@@ -6,6 +6,8 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { DbModule } from './db/drizzle.module';
 import { AuthModule } from './auth/auth.module';
+import { StorageModule } from './storage/storage.module';
+import { PhotosModule } from './photos/photos.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { AuthModule } from './auth/auth.module';
     DbModule,
     UsersModule,
     AuthModule,
+    StorageModule,
+    PhotosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

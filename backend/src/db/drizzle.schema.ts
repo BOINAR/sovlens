@@ -1,2 +1,2 @@
 export * from '../users/users.schema';
-export {};
+export * from '../photos/photos.schema';
