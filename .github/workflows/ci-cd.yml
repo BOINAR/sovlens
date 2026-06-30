@@ -162,4 +162,6 @@ jobs:
             export GARAGE_RPC_SECRET=${{ secrets.GARAGE_RPC_SECRET }}
             export GARAGE_ADMIN_TOKEN=${{ secrets.GARAGE_ADMIN_TOKEN }}
             envsubst < garage.toml.template > garage.toml
-            docker stack deploy -c docker-stack.yml sovlens --with-registry-auth
+            envsubst < docker-stack.yml > docker-stack-resolved.yml
+            docker stack deploy -c docker-stack-resolved.yml sovlens --with-registry-auth
+            rm docker-stack-resolved.yml
