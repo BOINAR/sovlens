@@ -36,7 +36,7 @@ export class AuthService {
 
     const passwordHash = await argon2.hash(data.password);
 
-    const user = await this.usersService.create({
+    await this.usersService.create({
       email: data.email,
       passwordHash,
     });
@@ -54,12 +54,11 @@ export class AuthService {
 
     const isPasswordValid = await argon2.verify(user.passwordHash, data.password);
     if (!isPasswordValid) {
-      // Même message que ci-dessus — on ne révèle pas lequel des deux est faux
       throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
 
     const accessToken = await this.generateAccessToken(user.id, user.email);
-    const { rawToken, tokenHash, expiresAt } = await this.generateRefreshToken();
+    const { rawToken, tokenHash, expiresAt } = this.generateRefreshToken();
 
     await this.authRepository.createRefreshToken(user.id, tokenHash, expiresAt);
 
@@ -78,9 +77,8 @@ export class AuthService {
 
     const user = await this.usersService.findById(stored.userId);
 
-    // Rotation du refresh token — on supprime l'ancien et on en crée un nouveau
     await this.authRepository.deleteRefreshToken(tokenHash);
-    const { rawToken, tokenHash: newHash, expiresAt } = await this.generateRefreshToken();
+    const { rawToken, tokenHash: newHash, expiresAt } = this.generateRefreshToken();
     await this.authRepository.createRefreshToken(user.id, newHash, expiresAt);
 
     const accessToken = await this.generateAccessToken(user.id, user.email);
@@ -101,7 +99,6 @@ export class AuthService {
   async forgotPassword(data: ForgotPasswordInput) {
     const user = await this.usersService.findByEmail(data.email);
 
-    // On répond toujours la même chose — on ne révèle pas si l'email existe
     if (!user) {
       return { message: 'Si ce compte existe, un email a été envoyé' };
     }
@@ -144,7 +141,6 @@ export class AuthService {
     await this.usersService.updatePassword(stored.userId, passwordHash);
     await this.authRepository.markPasswordResetTokenAsUsed(stored.id);
 
-    // Invalide toutes les sessions actives après reset
     await this.authRepository.deleteAllRefreshTokens(stored.userId);
 
     return { message: 'Mot de passe modifié avec succès' };
@@ -159,7 +155,7 @@ export class AuthService {
     );
   }
 
-  private async generateRefreshToken() {
+  private generateRefreshToken() {
     const rawToken = crypto.randomBytes(32).toString('hex');
     const tokenHash = this.hashToken(rawToken);
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7j

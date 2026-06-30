@@ -20,10 +20,10 @@ export class JwtGuard implements CanActivate {
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync(token, {
+      const payload = await this.jwtService.verifyAsync<Record<string, unknown>>(token, {
         secret: process.env.JWT_SECRET,
       });
-      request['user'] = payload;
+      (request as FastifyRequest & { user: unknown }).user = payload;
     } catch {
       throw new UnauthorizedException('Token invalide ou expiré');
     }
@@ -36,6 +36,6 @@ export class JwtGuard implements CanActivate {
     if (!authHeader) return null;
 
     const [type, token] = authHeader.split(' ');
-    return type === 'Bearer' ? token : null;
+    return type === 'Bearer' ? (token ?? null) : null;
   }
 }

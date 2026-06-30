@@ -5,6 +5,7 @@ import {
 } from '@nestjs/platform-fastify';
 import fastifyCookie from '@fastify/cookie';
 import fastifyMultipart from '@fastify/multipart';
+import fastifyCors from '@fastify/cors';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -17,16 +18,17 @@ async function bootstrap() {
 
   await app.register(fastifyMultipart, {
     limits: {
-      fileSize: 10 * 1024 * 1024, // 10MB
+      fileSize: 10 * 1024 * 1024,
     },
   });
 
-  await app.register(require('@fastify/cors'), {
+  await app.register(fastifyCors, {
     origin: process.env.FRONTEND_URL ?? 'http://localhost:3000',
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
     credentials: true,
   });
 
-  await app.listen(process.env.PORT ?? 3001, '0.0.0.0');
+  void app.listen(process.env.PORT ?? 3001, '0.0.0.0');
 }
-bootstrap();
+
+void bootstrap();

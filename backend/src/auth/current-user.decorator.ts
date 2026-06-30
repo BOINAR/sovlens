@@ -4,6 +4,6 @@ import { FastifyRequest } from 'fastify';
 export const CurrentUser = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest<FastifyRequest>();
-    return request['user'];
+    return (request as FastifyRequest & { user: unknown })['user'];
   },
 );
