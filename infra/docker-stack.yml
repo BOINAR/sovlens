@@ -1,0 +1,116 @@
+version: "3.9"
+
+services:
+  backend:
+    image: ghcr.io/boinar/sovlens/backend:${IMAGE_TAG:-latest}
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: 7d
+      S3_CLOUD_ENDPOINT: http://garage:3900
+      S3_CLOUD_ACCESS_KEY: ${S3_CLOUD_ACCESS_KEY}
+      S3_CLOUD_SECRET_KEY: ${S3_CLOUD_SECRET_KEY}
+      S3_CLOUD_BUCKET: ${S3_CLOUD_BUCKET}
+      NODE_ENV: production
+    networks:
+      - sovlens-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        order: start-first
+      resources:
+        limits:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  frontend:
+    image: ghcr.io/boinar/sovlens/frontend:${IMAGE_TAG:-latest}
+    environment:
+      NEXT_PUBLIC_API_URL: https://api.sovlens.stellodev.com
+      NODE_ENV: production
+    networks:
+      - sovlens-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        order: start-first
+      resources:
+        limits:
+          memory: 512M
+
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - sovlens-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+
+  garage:
+    image: dxflrs/garage:v1.0.1
+    volumes:
+      - ./garage.toml:/etc/garage.toml
+      - garage-meta:/var/lib/garage/meta
+      - garage-data:/var/lib/garage/data
+    networks:
+      - sovlens-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      DOMAIN_BASE: sovlens.stellodev.com
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - sovlens-net
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+networks:
+  sovlens-net:
+    driver: overlay
+
+volumes:
+  postgres-data:
+  garage-meta:
+  garage-data:
+  caddy-data:
+  caddy-config:
