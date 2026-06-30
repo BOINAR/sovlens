@@ -17,18 +17,18 @@ export class AuthRepository {
     return token;
   }
 
-  async findRefreshToken(tokenHash: string) {
-    const [token] = await this.db
-      .select()
-      .from(refreshTokensTable)
-      .where(
-        and(
-          eq(refreshTokensTable.tokenHash, tokenHash),
-          gt(refreshTokensTable.expiresAt, new Date()),
-        ),
-      );
-    return token;
-  }
+async findRefreshToken(tokenHash: string): Promise<typeof refreshTokensTable.$inferSelect | undefined> {
+  const [token] = await this.db
+    .select()
+    .from(refreshTokensTable)
+    .where(
+      and(
+        eq(refreshTokensTable.tokenHash, tokenHash),
+        gt(refreshTokensTable.expiresAt, new Date()),
+      ),
+    );
+  return token;
+}
 
   async deleteRefreshToken(tokenHash: string) {
     await this.db
@@ -52,19 +52,19 @@ export class AuthRepository {
     return token;
   }
 
-  async findPasswordResetToken(tokenHash: string) {
-    const [token] = await this.db
-      .select()
-      .from(passwordResetTokensTable)
-      .where(
-        and(
-          eq(passwordResetTokensTable.tokenHash, tokenHash),
-          gt(passwordResetTokensTable.expiresAt, new Date()),
-          isNull(passwordResetTokensTable.usedAt),
-        ),
-      );
-    return token;
-  }
+async findPasswordResetToken(tokenHash: string): Promise<typeof passwordResetTokensTable.$inferSelect | undefined> {
+  const [token] = await this.db
+    .select()
+    .from(passwordResetTokensTable)
+    .where(
+      and(
+        eq(passwordResetTokensTable.tokenHash, tokenHash),
+        gt(passwordResetTokensTable.expiresAt, new Date()),
+        isNull(passwordResetTokensTable.usedAt),
+      ),
+    );
+  return token;
+}
 
   async markPasswordResetTokenAsUsed(id: string) {
     await this.db

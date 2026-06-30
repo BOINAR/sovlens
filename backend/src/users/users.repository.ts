@@ -13,23 +13,23 @@ export class UsersRepository {
     return user;
   }
 
-  async findById(id: string) {
-    const [user] = await this.db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.id, id));
+async findById(id: string): Promise<typeof usersTable.$inferSelect | undefined> {
+  const [user] = await this.db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.id, id));
 
-    return user;
-  }
+  return user;
+}
 
-  async findByEmail(email: string) {
-    const [user] = await this.db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, email));
+async findByEmail(email: string): Promise<typeof usersTable.$inferSelect | undefined> {
+  const [user] = await this.db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.email, email));
 
-    return user;
-  }
+  return user;
+}
 
   async update(id: string, data: UpdateUserInput) {
     const [user] = await this.db

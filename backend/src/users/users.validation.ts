@@ -7,7 +7,9 @@ export const userSchema = createSelectSchema(usersTable);
 
 // Schéma d'insertion interne — utilisé uniquement par le repository
 // passwordHash est attendu : c'est l'AuthService qui hashe avant d'appeler create()
-export const createUserSchema = createInsertSchema(usersTable).omit({
+export const createUserSchema = createInsertSchema(usersTable, {
+  email: () => z.email(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
