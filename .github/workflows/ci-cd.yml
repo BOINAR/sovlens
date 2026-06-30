@@ -8,8 +8,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_BACKEND: ${{ github.repository }}/backend
-  IMAGE_FRONTEND: ${{ github.repository }}/frontend
+  IMAGE_BACKEND: boinar/sovlens/backend
+  IMAGE_FRONTEND: boinar/sovlens/frontend
 
 jobs:
   backend-test:
@@ -49,7 +49,7 @@ jobs:
           path: backend/coverage/
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v4
+        uses: SonarSource/sonarqube-scan-action@v5
         with:
           projectBaseDir: backend
         env:
@@ -134,14 +134,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Copie du docker-stack.yml sur le VM
+      - name: Copie des fichiers de déploiement sur le VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.STAGING_HOST }}
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
-          source: "infra/docker-stack.yml"
+          source: "infra/docker-stack.yml,infra/Caddyfile,infra/garage.toml.template"
           target: "~/sovlens-deploy"
+          strip_components: 1
 
       - name: Deploy stack via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -152,4 +153,14 @@ jobs:
           script: |
             cd ~/sovlens-deploy/infra
             export IMAGE_TAG=${{ github.sha }}
+            export POSTGRES_USER=${{ secrets.STAGING_POSTGRES_USER }}
+            export POSTGRES_PASSWORD=${{ secrets.STAGING_POSTGRES_PASSWORD }}
+            export POSTGRES_DB=${{ secrets.STAGING_POSTGRES_DB }}
+            export JWT_SECRET=${{ secrets.STAGING_JWT_SECRET }}
+            export S3_CLOUD_ACCESS_KEY=${{ secrets.STAGING_S3_ACCESS_KEY }}
+            export S3_CLOUD_SECRET_KEY=${{ secrets.STAGING_S3_SECRET_KEY }}
+            export S3_CLOUD_BUCKET=${{ secrets.STAGING_S3_BUCKET }}
+            export GARAGE_RPC_SECRET=${{ secrets.GARAGE_RPC_SECRET }}
+            export GARAGE_ADMIN_TOKEN=${{ secrets.GARAGE_ADMIN_TOKEN }}
+            envsubst < garage.toml.template > garage.toml
             docker stack deploy -c docker-stack.yml sovlens --with-registry-auth
