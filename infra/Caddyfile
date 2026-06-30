@@ -1,7 +1,15 @@
-api.{$DOMAIN_BASE} {
-	reverse_proxy backend:4000
+{
+    auto_https off
 }
 
-{$DOMAIN_BASE} {
-	reverse_proxy frontend:3000
+:80 {
+    @api host api.sovlens.stellodev.com
+    handle @api {
+        reverse_proxy backend:4000
+    }
+
+    @app host sovlens.stellodev.com
+    handle @app {
+        reverse_proxy frontend:3000
+    }
 }

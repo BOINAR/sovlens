@@ -87,11 +87,8 @@ services:
 
   caddy:
     image: caddy:2-alpine
-    environment:
-      DOMAIN_BASE: sovlens.stellodev.com
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy-data:/data
