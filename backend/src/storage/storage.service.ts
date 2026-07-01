@@ -22,17 +22,17 @@ export class CloudStorageProvider implements IStorageProvider {
 
   constructor() {
     this.client = new S3Client({
-      endpoint: process.env.S3_ENDPOINT,
-      region: process.env.S3_REGION ?? 'garage',
+      endpoint: process.env.S3_CLOUD_ENDPOINT,
+      region: process.env.S3_CLOUD_REGION ?? 'garage',
       credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY!,
-        secretAccessKey: process.env.S3_SECRET_KEY!,
+        accessKeyId: process.env.S3_CLOUD_ACCESS_KEY!,
+        secretAccessKey: process.env.S3_CLOUD_SECRET_KEY!,
       },
       forcePathStyle: true,
       requestChecksumCalculation: 'WHEN_REQUIRED',
       responseChecksumValidation: 'WHEN_REQUIRED',
     });
-    this.bucket = process.env.S3_BUCKET!;
+    this.bucket = process.env.S3_CLOUD_BUCKET!;
   }
 
   async upload(file: Buffer, key: string, mimeType: string): Promise<string> {
@@ -132,7 +132,6 @@ export class StorageService {
     this.cloudProvider = new CloudStorageProvider();
   }
 
-  // Retourne le bon provider selon le profil de stockage
   getProvider(storageProfile?: {
     mode: string;
     endpoint?: string | null;
@@ -157,7 +156,6 @@ export class StorageService {
     return this.cloudProvider;
   }
 
-  // Méthodes de commodité qui utilisent le cloud par défaut
   async upload(file: Buffer, key: string, mimeType: string): Promise<string> {
     return this.cloudProvider.upload(file, key, mimeType);
   }
