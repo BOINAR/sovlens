@@ -4,6 +4,7 @@ services:
   backend:
     image: ghcr.io/boinar/sovlens/backend:${IMAGE_TAG:-latest}
     environment:
+      PORT: "4000"
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: 7d
