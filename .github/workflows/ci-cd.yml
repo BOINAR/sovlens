@@ -164,4 +164,5 @@ jobs:
             envsubst '${IMAGE_TAG} ${POSTGRES_USER} ${POSTGRES_PASSWORD} ${POSTGRES_DB} ${JWT_SECRET} ${S3_CLOUD_ACCESS_KEY} ${S3_CLOUD_SECRET_KEY} ${S3_CLOUD_BUCKET} ${GARAGE_RPC_SECRET} ${GARAGE_ADMIN_TOKEN}' < garage.toml.template > garage.toml
             envsubst '${IMAGE_TAG} ${POSTGRES_USER} ${POSTGRES_PASSWORD} ${POSTGRES_DB} ${JWT_SECRET} ${S3_CLOUD_ACCESS_KEY} ${S3_CLOUD_SECRET_KEY} ${S3_CLOUD_BUCKET} ${GARAGE_RPC_SECRET} ${GARAGE_ADMIN_TOKEN}' < docker-stack.yml > docker-stack-resolved.yml
             docker stack deploy -c docker-stack-resolved.yml sovlens --with-registry-auth
+            docker service update --force sovlens_caddy
             rm docker-stack-resolved.yml
