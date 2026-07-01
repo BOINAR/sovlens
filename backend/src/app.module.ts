@@ -11,6 +11,7 @@ import { PhotosModule } from './photos/photos.module';
 import { AlbumsModule } from './albums/albums.module';
 import { StorageConfigModule } from './storage-config/storage-config.module';
 import { SharingModule } from './sharing/sharing.module';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -34,7 +35,7 @@ import { SharingModule } from './sharing/sharing.module';
     StorageConfigModule,
     SharingModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [AppService],
 })
 export class AppModule {}
