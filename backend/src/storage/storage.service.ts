@@ -18,11 +18,23 @@ export interface IStorageProvider {
 
 export class CloudStorageProvider implements IStorageProvider {
   private client: S3Client;
+  private publicClient: S3Client;
   private bucket: string;
 
   constructor() {
     this.client = new S3Client({
       endpoint: process.env.S3_CLOUD_ENDPOINT,
+      region: process.env.S3_CLOUD_REGION ?? 'garage',
+      credentials: {
+        accessKeyId: process.env.S3_CLOUD_ACCESS_KEY!,
+        secretAccessKey: process.env.S3_CLOUD_SECRET_KEY!,
+      },
+      forcePathStyle: true,
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
+    });
+    this.publicClient = new S3Client({
+      endpoint: process.env.S3_CLOUD_PUBLIC_ENDPOINT ?? process.env.S3_CLOUD_ENDPOINT,
       region: process.env.S3_CLOUD_REGION ?? 'garage',
       credentials: {
         accessKeyId: process.env.S3_CLOUD_ACCESS_KEY!,
@@ -55,7 +67,7 @@ export class CloudStorageProvider implements IStorageProvider {
 
   async getSignedUrl(key: string): Promise<string> {
     const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
-    return getSignedUrl(this.client, command, {
+    return getSignedUrl(this.publicClient, command, {
       expiresIn: 3600,
       signableHeaders: new Set(['host']),
     });

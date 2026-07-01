@@ -9,6 +9,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: 7d
       S3_CLOUD_ENDPOINT: http://garage:3900
+      S3_CLOUD_PUBLIC_ENDPOINT: https://sovlens-garage.stellodev.com
       S3_CLOUD_ACCESS_KEY: ${S3_CLOUD_ACCESS_KEY}
       S3_CLOUD_SECRET_KEY: ${S3_CLOUD_SECRET_KEY}
       S3_CLOUD_BUCKET: ${S3_CLOUD_BUCKET}
