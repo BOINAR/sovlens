@@ -1,7 +1,7 @@
 api.sovlens.stellodev.com {
-    reverse_proxy backend:4000
+    reverse_proxy sovlens_backend:4000
 }
 
 sovlens.stellodev.com {
-    reverse_proxy frontend:3000
+    reverse_proxy sovlens_frontend:3000
 }
