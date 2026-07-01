@@ -88,8 +88,10 @@ services:
     image: caddy:2-alpine
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
+      - /etc/caddy/certs:/etc/caddy/certs
       - caddy-data:/data
       - caddy-config:/config
     networks:

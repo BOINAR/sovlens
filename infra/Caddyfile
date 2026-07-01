@@ -1,15 +1,9 @@
-{
-    auto_https off
+api.sovlens.stellodev.com {
+    tls /etc/caddy/certs/stellodev.pem /etc/caddy/certs/stellodev.key
+    reverse_proxy backend:4000
 }
 
-:80 {
-    @api host api.sovlens.stellodev.com
-    handle @api {
-        reverse_proxy backend:4000
-    }
-
-    @app host sovlens.stellodev.com
-    handle @app {
-        reverse_proxy frontend:3000
-    }
+sovlens.stellodev.com {
+    tls /etc/caddy/certs/stellodev.pem /etc/caddy/certs/stellodev.key
+    reverse_proxy frontend:3000
 }
