@@ -161,7 +161,7 @@ jobs:
             export S3_CLOUD_BUCKET=${{ secrets.STAGING_S3_BUCKET }}
             export GARAGE_RPC_SECRET=${{ secrets.GARAGE_RPC_SECRET }}
             export GARAGE_ADMIN_TOKEN=${{ secrets.GARAGE_ADMIN_TOKEN }}
-            envsubst < garage.toml.template > garage.toml
-            envsubst < docker-stack.yml > docker-stack-resolved.yml
+            envsubst '${IMAGE_TAG} ${POSTGRES_USER} ${POSTGRES_PASSWORD} ${POSTGRES_DB} ${JWT_SECRET} ${S3_CLOUD_ACCESS_KEY} ${S3_CLOUD_SECRET_KEY} ${S3_CLOUD_BUCKET} ${GARAGE_RPC_SECRET} ${GARAGE_ADMIN_TOKEN}' < garage.toml.template > garage.toml
+            envsubst '${IMAGE_TAG} ${POSTGRES_USER} ${POSTGRES_PASSWORD} ${POSTGRES_DB} ${JWT_SECRET} ${S3_CLOUD_ACCESS_KEY} ${S3_CLOUD_SECRET_KEY} ${S3_CLOUD_BUCKET} ${GARAGE_RPC_SECRET} ${GARAGE_ADMIN_TOKEN}' < docker-stack.yml > docker-stack-resolved.yml
             docker stack deploy -c docker-stack-resolved.yml sovlens --with-registry-auth
             rm docker-stack-resolved.yml
