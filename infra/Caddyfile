@@ -1,4 +1,4 @@
-api.sovlens.stellodev.com {
+sovlens-api.stellodev.com {
     reverse_proxy sovlens_backend:4000
 }
 

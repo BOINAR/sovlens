@@ -35,7 +35,7 @@ services:
   frontend:
     image: ghcr.io/boinar/sovlens/frontend:${IMAGE_TAG:-latest}
     environment:
-      NEXT_PUBLIC_API_URL: https://api.sovlens.stellodev.com
+      NEXT_PUBLIC_API_URL: https://sovlens-api.stellodev.com
       NODE_ENV: production
     networks:
       - sovlens-net
