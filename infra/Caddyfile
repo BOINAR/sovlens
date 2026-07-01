@@ -1,9 +1,7 @@
 api.sovlens.stellodev.com {
-    tls /etc/caddy/certs/stellodev.pem /etc/caddy/certs/stellodev.key
     reverse_proxy backend:4000
 }
 
 sovlens.stellodev.com {
-    tls /etc/caddy/certs/stellodev.pem /etc/caddy/certs/stellodev.key
     reverse_proxy frontend:3000
 }
