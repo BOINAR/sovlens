@@ -20,7 +20,6 @@ services:
       restart_policy:
         condition: on-failure
         delay: 5s
-        max_attempts: 3
       update_config:
         order: start-first
       resources:
@@ -29,9 +28,9 @@ services:
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:4000/health"]
       interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   frontend:
     image: ghcr.io/boinar/sovlens/frontend:${IMAGE_TAG:-latest}
@@ -45,7 +44,6 @@ services:
       restart_policy:
         condition: on-failure
         delay: 5s
-        max_attempts: 3
       update_config:
         order: start-first
       resources:
