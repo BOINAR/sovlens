@@ -1,4 +1,5 @@
 import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { Pool } from 'pg';
 import * as schema from './drizzle.schema';
 
@@ -13,14 +14,18 @@ export const DrizzleProvider = {
       connectionString: process.env.DATABASE_URL,
     });
 
-    // 🔥 TEST DB
     await pool.query('SELECT 1');
     console.log('✅ Database connected');
 
-    return drizzle({
+    const db = drizzle({
       client: pool,
       schema,
       logger: true,
     });
+
+    await migrate(db, { migrationsFolder: './drizzle' });
+    console.log('✅ Migrations applied');
+
+    return db;
   },
 };
