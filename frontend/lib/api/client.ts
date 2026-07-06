@@ -19,7 +19,9 @@ export function getAccessToken() {
 
 export function onAccessTokenChange(listener: Listener) {
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 }
 
 async function doRefresh(): Promise<string | null> {
