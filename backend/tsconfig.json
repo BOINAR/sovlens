@@ -12,7 +12,7 @@
     "rootDir": "./src",
     "ignoreDeprecations": "5.0",
     "paths": { "*": ["./*"] },
-    "incremental": true,
+    "incremental": false,
     "skipLibCheck": true,
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
@@ -20,5 +20,6 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "types": ["jest", "node"]
-  }
+  },
+  "exclude": ["node_modules", "dist", "drizzle.config.ts", "test"]
 }
