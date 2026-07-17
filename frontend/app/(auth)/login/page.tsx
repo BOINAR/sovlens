@@ -48,8 +48,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="fixed inset-0 flex">
-      <div className="flex-1 relative overflow-hidden border-r border-sv-border p-12 flex flex-col justify-between">
+    <div className="min-h-screen flex flex-col md:flex-row md:fixed md:inset-0">
+      {/* Panneau marketing : caché sous md, visible à partir de md */}
+      <div className="hidden md:flex flex-1 relative overflow-hidden border-r border-sv-border p-8 lg:p-12 flex-col justify-between">
         <div
           className="absolute inset-0"
           style={{
@@ -64,7 +65,7 @@ export default function LoginPage() {
         </div>
 
         <div className="relative">
-          <h2 className="font-display font-bold text-[34px] leading-[1.1] tracking-tight mb-4 max-w-[16ch]">
+          <h2 className="font-display font-bold text-2xl lg:text-[34px] leading-[1.1] tracking-tight mb-4 max-w-[16ch]">
             Vos souvenirs, à l&apos;abri des regards.
           </h2>
           <p className="text-[15px] text-sv-text2 max-w-[42ch] mb-6">
@@ -86,8 +87,17 @@ export default function LoginPage() {
         <div className="relative font-mono text-[11.5px] text-sv-text3">RGAA AA · chiffré · sans traceur</div>
       </div>
 
-      <div className="w-110 flex items-center justify-center p-10 bg-[#0d0f13]">
+      {/* Formulaire : pleine largeur sous md, largeur fixe à partir de md */}
+      <div className="flex-1 md:flex-none md:w-110 flex items-center justify-center p-6 sm:p-8 md:p-10 bg-[#0d0f13]">
         <div className="w-full max-w-85">
+          {/* Logo visible uniquement sur mobile, puisque le panneau gauche est caché */}
+          <div className="flex md:hidden items-center gap-3 mb-8 justify-center">
+            <div className="w-8 h-8 rounded-full border-[2.5px] border-sv-accent flex items-center justify-center">
+              <div className="w-2.5 h-2.5 rounded-full bg-sv-accent" />
+            </div>
+            <span className="font-display font-bold text-lg">SovLens</span>
+          </div>
+
           {view === 'forgot' ? (
             <>
               <button
