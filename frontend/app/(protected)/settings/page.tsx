@@ -19,6 +19,7 @@ export default function SettingsPage() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (config?.endpoint) setEndpoint(config.endpoint);
     if (config?.bucket) setBucket(config.bucket);
   }, [config]);

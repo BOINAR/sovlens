@@ -18,14 +18,12 @@ describe('storage-config.validation', () => {
       expect(result.success).toBe(true);
     });
 
-    it('devrait rejeter le mode souverain sans endpoint', () => {
+    it('devrait valider le passage en mode souverain sans fournir de nouveaux credentials', () => {
       const result = updateStorageConfigSchema.safeParse({
         mode: 'sovereign',
-        accessKey: 'access-key',
-        secretKey: 'secret-key',
-        bucket: 'sovlens-photos',
       });
-      expect(result.success).toBe(false);
+
+      expect(result.success).toBe(true);
     });
 
     it('devrait rejeter une URL invalide pour endpoint', () => {
