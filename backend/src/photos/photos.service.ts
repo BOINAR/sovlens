@@ -17,9 +17,9 @@ export class PhotosService {
     private readonly storageConfigRepository: StorageConfigRepository,
   ) {}
 
-  private async getProvider(userId: string) {
+  private async getProviderForMode(userId: string, mode: string) {
     const profile = await this.storageConfigRepository.findByUserId(userId);
-    return this.storageService.getProvider(profile ?? undefined);
+    return this.storageService.getProvider(mode, profile ?? undefined);
   }
 
   async upload(
@@ -46,8 +46,8 @@ export class PhotosService {
     }
 
     const profile = await this.storageConfigRepository.findByUserId(userId);
-    const provider = this.storageService.getProvider(profile ?? undefined);
     const storageMode = profile?.mode === 'sovereign' ? 'sovereign' : 'cloud';
+    const provider = this.storageService.getProvider(storageMode, profile ?? undefined);
 
     const extension = originalName.split('.').pop();
     const objectKey = `${userId}/${randomUUID()}.${extension}`;
@@ -78,20 +78,23 @@ export class PhotosService {
       throw new ForbiddenException('Accès refusé');
     }
 
-    const provider = await this.getProvider(userId);
+    const provider = await this.getProviderForMode(userId, photo.storageMode);
     const stream = await provider.getStream(photo.objectKey);
     return { stream, photo };
   }
 
   async findAll(userId: string) {
     const photos = await this.photosRepository.findAllByUserId(userId);
-    const provider = await this.getProvider(userId);
+    const profile = await this.storageConfigRepository.findByUserId(userId);
 
     const photosWithUrls = await Promise.all(
-      photos.map(async (photo) => ({
-        ...photo,
-        url: await provider.getSignedUrl(photo.objectKey),
-      })),
+      photos.map(async (photo) => {
+        const provider = this.storageService.getProvider(photo.storageMode, profile ?? undefined);
+        return {
+          ...photo,
+          url: await provider.getSignedUrl(photo.objectKey),
+        };
+      }),
     );
 
     return photosWithUrls;
@@ -108,7 +111,7 @@ export class PhotosService {
       throw new ForbiddenException('Accès refusé');
     }
 
-    const provider = await this.getProvider(userId);
+    const provider = await this.getProviderForMode(userId, photo.storageMode);
     const url = await provider.getSignedUrl(photo.objectKey);
     return { ...photo, url };
   }
@@ -124,7 +127,7 @@ export class PhotosService {
       throw new ForbiddenException('Accès refusé');
     }
 
-    const provider = await this.getProvider(userId);
+    const provider = await this.getProviderForMode(userId, photo.storageMode);
     await provider.delete(photo.objectKey);
     await this.photosRepository.delete(photoId);
 

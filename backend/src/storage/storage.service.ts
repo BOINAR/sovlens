@@ -150,16 +150,18 @@ export class StorageService {
     this.cloudProvider = new CloudStorageProvider();
   }
 
-  getProvider(storageProfile?: {
-    mode: string;
-    endpoint?: string | null;
-    accessKey?: string | null;
-    secretKey?: string | null;
-    bucket?: string | null;
-  }): IStorageProvider {
+  getProvider(
+    mode: string,
+    storageProfile?: {
+      endpoint?: string | null;
+      accessKey?: string | null;
+      secretKey?: string | null;
+      bucket?: string | null;
+    },
+  ): IStorageProvider {
     if (
-      storageProfile?.mode === 'sovereign' &&
-      storageProfile.endpoint &&
+      mode === 'sovereign' &&
+      storageProfile?.endpoint &&
       storageProfile.accessKey &&
       storageProfile.secretKey &&
       storageProfile.bucket

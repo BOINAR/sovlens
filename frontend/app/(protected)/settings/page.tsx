@@ -38,6 +38,18 @@ export default function SettingsPage() {
     }
   }
 
+  async function handleSovereignQuickClick() {
+    setError(null);
+    setSwitching(true);
+    try {
+      await setSovereignConfig({});
+    } catch {
+      document.getElementById('sovereign-form')?.scrollIntoView({ behavior: 'smooth' });
+    } finally {
+      setSwitching(false);
+    }
+  }
+
   async function handleSovereignSubmit(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -106,8 +118,11 @@ export default function SettingsPage() {
               </div>
             </button>
 
-            <div
-              className="rounded-2xl p-4"
+            <button
+              type="button"
+              onClick={handleSovereignQuickClick}
+              disabled={switching}
+              className="text-left rounded-2xl p-4 transition-all disabled:opacity-60"
               style={{
                 border: isSovereign ? '1.5px solid #3ee0a1' : '1px solid #262c35',
                 background: isSovereign ? 'rgba(255,255,255,.02)' : 'var(--color-sv-base)',
@@ -132,7 +147,7 @@ export default function SettingsPage() {
                 <div>Clés privées · zéro-connaissance</div>
                 <div>Aucune dépendance tierce</div>
               </div>
-            </div>
+            </button>
           </div>
 
           <div className="flex items-center justify-between mt-4.5 px-4 py-3.5 bg-sv-surface2 border border-sv-border rounded-xl">
@@ -150,7 +165,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Config serveur souverain */}
-      <div className="border border-sv-border rounded-2xl bg-sv-surface overflow-hidden mb-5.5">
+      <div id="sovereign-form" className="border border-sv-border rounded-2xl bg-sv-surface overflow-hidden mb-5.5">
         <div className="px-4.5 md:px-5.5 py-4 border-b border-sv-border">
           <div className="font-semibold text-[13.5px]">Configuration du serveur souverain</div>
           <div className="text-xs text-sv-text3 mt-0.5">Endpoint S3, bucket et identifiants Garage</div>

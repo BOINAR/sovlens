@@ -72,9 +72,7 @@ export default function GalleryPage() {
           <span className="text-sv-accent font-bold">{photos.length}</span>{" "}
           photos
         </div>
-        <a
-          href="/upload"
-          className="bg-sv-accent text-[#04150e] px-3.75 py-2 rounded-lg font-bold text-[13px]">
+        <a href="/upload" className="bg-sv-accent text-[#04150e] px-3.75 py-2 rounded-lg font-bold text-[13px]">
           + Importer
         </a>
       </div>
@@ -96,12 +94,13 @@ export default function GalleryPage() {
           <button
             key={photo.id}
             onClick={() => setOpenIndex(i)}
-            className="block w-full break-inside-avoid mb-3.5 rounded-xl overflow-hidden border border-[#20262f] relative text-left hover:border-sv-accent transition-colors">
+            className="block w-full break-inside-avoid mb-3.5 rounded-xl overflow-hidden border border-[#20262f] relative text-left hover:border-sv-accent transition-colors aspect-square bg-sv-surface2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={photo.url}
               alt={photo.originalName}
-              className="w-full h-auto block"
+              className="w-full h-full object-cover block"
+              onError={(e) => { e.currentTarget.style.opacity = '0'; }}
             />
             <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent pointer-events-none" />
             <div className="absolute left-2.5 bottom-2 font-mono text-[10.5px] text-white/70 truncate max-w-[85%]">
@@ -185,10 +184,7 @@ export default function GalleryPage() {
             </div>
 
             <div className="grid gap-2.5">
-              <a
-                href={current.url}
-                download={current.originalName}
-                className="w-full text-center bg-sv-accent text-[#04150e] h-11 rounded-[11px] font-bold text-sm flex items-center justify-center">
+              <a href={current.url} download={current.originalName} className="w-full text-center bg-sv-accent text-[#04150e] h-11 rounded-[11px] font-bold text-sm flex items-center justify-center">
                 Télécharger l&apos;original
               </a>
               <button
