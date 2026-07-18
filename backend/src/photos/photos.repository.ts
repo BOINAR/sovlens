@@ -16,10 +16,7 @@ export class PhotosRepository {
     objectKey: string;
     storageMode?: 'cloud' | 'sovereign';
   }) {
-    const [photo] = await this.db
-      .insert(photosTable)
-      .values(data)
-      .returning();
+    const [photo] = await this.db.insert(photosTable).values(data).returning();
     return photo;
   }
 

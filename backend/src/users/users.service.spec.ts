@@ -39,7 +39,7 @@ describe('UsersService', () => {
   });
 
   describe('create', () => {
-    it('devrait créer un utilisateur si l\'email n\'existe pas', async () => {
+    it("devrait créer un utilisateur si l'email n'existe pas", async () => {
       usersRepository.findByEmail.mockResolvedValue(undefined);
       usersRepository.create.mockResolvedValue(mockUser);
 
@@ -52,7 +52,7 @@ describe('UsersService', () => {
       expect(result).toEqual(mockUser);
     });
 
-    it('devrait rejeter si l\'email existe déjà', async () => {
+    it("devrait rejeter si l'email existe déjà", async () => {
       usersRepository.findByEmail.mockResolvedValue(mockUser);
 
       await expect(
@@ -73,7 +73,7 @@ describe('UsersService', () => {
       expect(result).toHaveProperty('email', mockUser.email);
     });
 
-    it('devrait rejeter si l\'utilisateur n\'existe pas', async () => {
+    it("devrait rejeter si l'utilisateur n'existe pas", async () => {
       usersRepository.findById.mockResolvedValue(undefined);
 
       await expect(service.findById('unknown-id')).rejects.toThrow(
@@ -91,7 +91,7 @@ describe('UsersService', () => {
       expect(result).toEqual(mockUser);
     });
 
-    it('devrait retourner undefined si l\'utilisateur n\'existe pas', async () => {
+    it("devrait retourner undefined si l'utilisateur n'existe pas", async () => {
       usersRepository.findByEmail.mockResolvedValue(undefined);
 
       const result = await service.findByEmail('inconnu@sovlens.com');
@@ -114,7 +114,7 @@ describe('UsersService', () => {
       expect(result.email).toBe('nouveau@sovlens.com');
     });
 
-    it('devrait rejeter si l\'utilisateur n\'existe pas', async () => {
+    it("devrait rejeter si l'utilisateur n'existe pas", async () => {
       usersRepository.update.mockResolvedValue(undefined as any);
 
       await expect(
@@ -136,7 +136,7 @@ describe('UsersService', () => {
       expect(result).toEqual(mockUser);
     });
 
-    it('devrait rejeter si l\'utilisateur n\'existe pas', async () => {
+    it("devrait rejeter si l'utilisateur n'existe pas", async () => {
       usersRepository.updatePassword.mockResolvedValue(undefined as any);
 
       await expect(

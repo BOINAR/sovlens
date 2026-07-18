@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PhotosService } from './photos.service';
 import { PhotosRepository } from './photos.repository';
 import { StorageService } from '../storage/storage.service';
@@ -103,7 +107,10 @@ describe('PhotosService', () => {
         updatedAt: new Date(),
       } as any);
       mockProvider.upload.mockResolvedValue('object-key');
-      photosRepository.create.mockResolvedValue({ ...mockPhoto, storageMode: 'sovereign' });
+      photosRepository.create.mockResolvedValue({
+        ...mockPhoto,
+        storageMode: 'sovereign',
+      });
 
       const file = Buffer.from('fake-image-data');
       await service.upload(userId, file, 'photo.webp', 'image/webp', 1000);
@@ -147,7 +154,7 @@ describe('PhotosService', () => {
   });
 
   describe('findOne', () => {
-    it('devrait retourner la photo si elle appartient à l\'utilisateur', async () => {
+    it("devrait retourner la photo si elle appartient à l'utilisateur", async () => {
       storageConfigRepository.findByUserId.mockResolvedValue(undefined as any);
       photosRepository.findById.mockResolvedValue(mockPhoto);
       mockProvider.getSignedUrl.mockResolvedValue('https://signed-url.com');
@@ -157,7 +164,7 @@ describe('PhotosService', () => {
       expect(result).toHaveProperty('url');
     });
 
-    it('devrait rejeter si la photo n\'existe pas', async () => {
+    it("devrait rejeter si la photo n'existe pas", async () => {
       photosRepository.findById.mockResolvedValue(undefined as any);
 
       await expect(service.findOne(userId, 'unknown-id')).rejects.toThrow(
@@ -190,7 +197,7 @@ describe('PhotosService', () => {
       expect(result).toEqual({ message: 'Photo supprimée avec succès' });
     });
 
-    it('devrait rejeter si la photo n\'existe pas', async () => {
+    it("devrait rejeter si la photo n'existe pas", async () => {
       photosRepository.findById.mockResolvedValue(undefined as any);
 
       await expect(service.delete(userId, 'unknown-id')).rejects.toThrow(
@@ -198,7 +205,7 @@ describe('PhotosService', () => {
       );
     });
 
-    it('devrait rejeter si l\'utilisateur n\'est pas propriétaire', async () => {
+    it("devrait rejeter si l'utilisateur n'est pas propriétaire", async () => {
       photosRepository.findById.mockResolvedValue({
         ...mockPhoto,
         userId: 'other-user-id',

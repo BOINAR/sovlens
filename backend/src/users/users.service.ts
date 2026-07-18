@@ -20,16 +20,16 @@ export class UsersService {
     return this.usersRepository.create(data);
   }
 
-async findById(id: string) {
-  const user = await this.usersRepository.findById(id);
+  async findById(id: string) {
+    const user = await this.usersRepository.findById(id);
 
-  if (!user) {
-    throw new NotFoundException('Utilisateur introuvable');
+    if (!user) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
+
+    const { passwordHash, ...safeUser } = user;
+    return safeUser;
   }
-
-  const { passwordHash, ...safeUser } = user;
-  return safeUser;
-}
 
   async findByEmail(email: string) {
     return this.usersRepository.findByEmail(email);

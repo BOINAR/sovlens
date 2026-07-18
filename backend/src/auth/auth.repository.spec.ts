@@ -43,10 +43,7 @@ describe('AuthRepository', () => {
     resetMockDb();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AuthRepository,
-        { provide: DRIZZLE, useValue: mockDb },
-      ],
+      providers: [AuthRepository, { provide: DRIZZLE, useValue: mockDb }],
     }).compile();
 
     repository = module.get<AuthRepository>(AuthRepository);
@@ -94,7 +91,7 @@ describe('AuthRepository', () => {
   });
 
   describe('deleteAllRefreshTokens', () => {
-    it('devrait supprimer tous les refresh tokens d\'un utilisateur', async () => {
+    it("devrait supprimer tous les refresh tokens d'un utilisateur", async () => {
       mockDb.where.mockResolvedValue(undefined);
 
       await repository.deleteAllRefreshTokens(userId);

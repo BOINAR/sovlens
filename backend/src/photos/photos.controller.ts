@@ -15,7 +15,6 @@ import { PhotosService } from './photos.service';
 import { JwtGuard } from '../auth/jwt.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 
-
 @Controller('photos')
 @UseGuards(JwtGuard)
 export class PhotosController {
@@ -45,17 +44,20 @@ export class PhotosController {
   }
 
   @Get(':id/download')
-async download(
-  @CurrentUser() user: { sub: string; email: string },
-  @Param('id') id: string,
-  @Res() reply: FastifyReply,
-) {
-  const { stream, photo } = await this.photosService.download(user.sub, id);
+  async download(
+    @CurrentUser() user: { sub: string; email: string },
+    @Param('id') id: string,
+    @Res() reply: FastifyReply,
+  ) {
+    const { stream, photo } = await this.photosService.download(user.sub, id);
 
-  reply.header('Content-Disposition', `attachment; filename="${photo.originalName}"`);
-  reply.header('Content-Type', photo.mimeType);
-  reply.send(stream);
-}
+    reply.header(
+      'Content-Disposition',
+      `attachment; filename="${photo.originalName}"`,
+    );
+    reply.header('Content-Type', photo.mimeType);
+    reply.send(stream);
+  }
 
   @Get()
   findAll(@CurrentUser() user: { sub: string; email: string }) {

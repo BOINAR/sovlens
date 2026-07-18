@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import { DRIZZLE, DbClient } from 'src/db/drizzle.provider';
-import { refreshTokensTable, passwordResetTokensTable } from '../users/users.schema';
+import {
+  refreshTokensTable,
+  passwordResetTokensTable,
+} from '../users/users.schema';
 
 @Injectable()
 export class AuthRepository {
@@ -17,18 +20,20 @@ export class AuthRepository {
     return token;
   }
 
-async findRefreshToken(tokenHash: string): Promise<typeof refreshTokensTable.$inferSelect | undefined> {
-  const [token] = await this.db
-    .select()
-    .from(refreshTokensTable)
-    .where(
-      and(
-        eq(refreshTokensTable.tokenHash, tokenHash),
-        gt(refreshTokensTable.expiresAt, new Date()),
-      ),
-    );
-  return token;
-}
+  async findRefreshToken(
+    tokenHash: string,
+  ): Promise<typeof refreshTokensTable.$inferSelect | undefined> {
+    const [token] = await this.db
+      .select()
+      .from(refreshTokensTable)
+      .where(
+        and(
+          eq(refreshTokensTable.tokenHash, tokenHash),
+          gt(refreshTokensTable.expiresAt, new Date()),
+        ),
+      );
+    return token;
+  }
 
   async deleteRefreshToken(tokenHash: string) {
     await this.db
@@ -44,7 +49,11 @@ async findRefreshToken(tokenHash: string): Promise<typeof refreshTokensTable.$in
 
   // ─── Password Reset Tokens ────────────────────────────────────────
 
-  async createPasswordResetToken(userId: string, tokenHash: string, expiresAt: Date) {
+  async createPasswordResetToken(
+    userId: string,
+    tokenHash: string,
+    expiresAt: Date,
+  ) {
     const [token] = await this.db
       .insert(passwordResetTokensTable)
       .values({ userId, tokenHash, expiresAt })
@@ -52,19 +61,21 @@ async findRefreshToken(tokenHash: string): Promise<typeof refreshTokensTable.$in
     return token;
   }
 
-async findPasswordResetToken(tokenHash: string): Promise<typeof passwordResetTokensTable.$inferSelect | undefined> {
-  const [token] = await this.db
-    .select()
-    .from(passwordResetTokensTable)
-    .where(
-      and(
-        eq(passwordResetTokensTable.tokenHash, tokenHash),
-        gt(passwordResetTokensTable.expiresAt, new Date()),
-        isNull(passwordResetTokensTable.usedAt),
-      ),
-    );
-  return token;
-}
+  async findPasswordResetToken(
+    tokenHash: string,
+  ): Promise<typeof passwordResetTokensTable.$inferSelect | undefined> {
+    const [token] = await this.db
+      .select()
+      .from(passwordResetTokensTable)
+      .where(
+        and(
+          eq(passwordResetTokensTable.tokenHash, tokenHash),
+          gt(passwordResetTokensTable.expiresAt, new Date()),
+          isNull(passwordResetTokensTable.usedAt),
+        ),
+      );
+    return token;
+  }
 
   async markPasswordResetTokenAsUsed(id: string) {
     await this.db

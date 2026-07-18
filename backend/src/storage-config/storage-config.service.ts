@@ -25,7 +25,12 @@ export class StorageConfigService {
   async updateConfig(userId: string, data: UpdateStorageConfigInput) {
     if (data.mode === 'sovereign' && !data.endpoint) {
       const existing = await this.storageConfigRepository.findByUserId(userId);
-      if (!existing?.endpoint || !existing?.accessKey || !existing?.secretKey || !existing?.bucket) {
+      if (
+        !existing?.endpoint ||
+        !existing?.accessKey ||
+        !existing?.secretKey ||
+        !existing?.bucket
+      ) {
         throw new BadRequestException(
           'Aucune configuration souveraine enregistrée. Renseignez vos identifiants S3 dans les Paramètres.',
         );

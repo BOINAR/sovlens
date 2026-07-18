@@ -6,7 +6,11 @@ import {
 } from '@nestjs/common';
 import { AlbumsRepository } from './albums.repository';
 import { PhotosRepository } from '../photos/photos.repository';
-import { CreateAlbumInput, UpdateAlbumInput, AddPhotoToAlbumInput } from './albums.validation';
+import {
+  CreateAlbumInput,
+  UpdateAlbumInput,
+  AddPhotoToAlbumInput,
+} from './albums.validation';
 
 @Injectable()
 export class AlbumsService {
@@ -88,10 +92,13 @@ export class AlbumsService {
       throw new ForbiddenException('Accès refusé');
     }
 
-    const alreadyInAlbum = await this.albumsRepository.photoExistsInAlbum(albumId, data.photoId);
+    const alreadyInAlbum = await this.albumsRepository.photoExistsInAlbum(
+      albumId,
+      data.photoId,
+    );
 
     if (alreadyInAlbum) {
-      throw new BadRequestException('Cette photo est déjà dans l\'album');
+      throw new BadRequestException("Cette photo est déjà dans l'album");
     }
 
     await this.albumsRepository.addPhoto(albumId, data.photoId);
@@ -109,13 +116,16 @@ export class AlbumsService {
       throw new ForbiddenException('Accès refusé');
     }
 
-    const inAlbum = await this.albumsRepository.photoExistsInAlbum(albumId, photoId);
+    const inAlbum = await this.albumsRepository.photoExistsInAlbum(
+      albumId,
+      photoId,
+    );
 
     if (!inAlbum) {
       throw new NotFoundException('Photo introuvable dans cet album');
     }
 
     await this.albumsRepository.removePhoto(albumId, photoId);
-    return { message: 'Photo retirée de l\'album' };
+    return { message: "Photo retirée de l'album" };
   }
 }

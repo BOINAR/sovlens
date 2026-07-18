@@ -29,7 +29,10 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() body: unknown, @Res({ passthrough: true }) reply: FastifyReply) {
+  async login(
+    @Body() body: unknown,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
     const data = loginSchema.parse(body);
     const { accessToken, refreshToken } = await this.authService.login(data);
 
@@ -47,15 +50,21 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@Req() req: FastifyRequest, @Res({ passthrough: true }) reply: FastifyReply) {
+  async refresh(
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
     const rawRefreshToken = req.cookies?.['refresh_token'];
 
     if (!rawRefreshToken) {
-      reply.status(HttpStatus.UNAUTHORIZED).send({ message: 'Session expirée' });
+      reply
+        .status(HttpStatus.UNAUTHORIZED)
+        .send({ message: 'Session expirée' });
       return;
     }
 
-    const { accessToken, refreshToken } = await this.authService.refresh(rawRefreshToken);
+    const { accessToken, refreshToken } =
+      await this.authService.refresh(rawRefreshToken);
 
     reply.setCookie('refresh_token', refreshToken, {
       httpOnly: true,
@@ -70,7 +79,10 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@Req() req: FastifyRequest, @Res({ passthrough: true }) reply: FastifyReply) {
+  async logout(
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
     const rawRefreshToken = req.cookies?.['refresh_token'];
 
     if (rawRefreshToken) {

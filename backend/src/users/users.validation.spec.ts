@@ -1,4 +1,8 @@
-import { createUserSchema, updateUserSchema, userSchema } from './users.validation';
+import {
+  createUserSchema,
+  updateUserSchema,
+  userSchema,
+} from './users.validation';
 
 describe('users.validation', () => {
   describe('createUserSchema', () => {

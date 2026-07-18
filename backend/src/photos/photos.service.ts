@@ -29,7 +29,12 @@ export class PhotosService {
     mimeType: string,
     size: number,
   ) {
-    const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const ALLOWED_MIME_TYPES = [
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'image/gif',
+    ];
     const MAX_SIZE = 10 * 1024 * 1024;
 
     if (!ALLOWED_MIME_TYPES.includes(mimeType)) {

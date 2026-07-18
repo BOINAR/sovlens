@@ -13,4 +13,6 @@ export const updateStorageConfigSchema = z.discriminatedUnion('mode', [
   }),
 ]);
 
-export type UpdateStorageConfigInput = z.infer<typeof updateStorageConfigSchema>;
+export type UpdateStorageConfigInput = z.infer<
+  typeof updateStorageConfigSchema
+>;

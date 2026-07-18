@@ -34,7 +34,8 @@ export class CloudStorageProvider implements IStorageProvider {
       responseChecksumValidation: 'WHEN_REQUIRED',
     });
     this.publicClient = new S3Client({
-      endpoint: process.env.S3_CLOUD_PUBLIC_ENDPOINT ?? process.env.S3_CLOUD_ENDPOINT,
+      endpoint:
+        process.env.S3_CLOUD_PUBLIC_ENDPOINT ?? process.env.S3_CLOUD_ENDPOINT,
       region: process.env.S3_CLOUD_REGION ?? 'garage',
       credentials: {
         accessKeyId: process.env.S3_CLOUD_ACCESS_KEY!,
@@ -86,7 +87,12 @@ export class SovereignStorageProvider implements IStorageProvider {
   private client: S3Client;
   private bucket: string;
 
-  constructor(endpoint: string, accessKey: string, secretKey: string, bucket: string) {
+  constructor(
+    endpoint: string,
+    accessKey: string,
+    secretKey: string,
+    bucket: string,
+  ) {
     this.client = new S3Client({
       endpoint,
       region: 'garage',

@@ -37,10 +37,7 @@ describe('SharingRepository', () => {
     resetMockDb();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        SharingRepository,
-        { provide: DRIZZLE, useValue: mockDb },
-      ],
+      providers: [SharingRepository, { provide: DRIZZLE, useValue: mockDb }],
     }).compile();
 
     repository = module.get<SharingRepository>(SharingRepository);

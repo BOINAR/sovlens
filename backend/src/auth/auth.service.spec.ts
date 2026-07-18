@@ -79,7 +79,7 @@ describe('AuthService', () => {
 
   describe('register', () => {
     it('devrait créer un nouvel utilisateur', async () => {
-      usersService.findByEmail.mockResolvedValue(undefined as any);
+      usersService.findByEmail.mockResolvedValue(undefined);
       (argon2.hash as jest.Mock).mockResolvedValue('hashed-password');
       usersService.create.mockResolvedValue(mockUser);
 
@@ -97,11 +97,14 @@ describe('AuthService', () => {
       expect(result).toEqual({ message: 'Compte créé avec succès' });
     });
 
-    it('devrait rejeter si l\'email existe déjà', async () => {
+    it("devrait rejeter si l'email existe déjà", async () => {
       usersService.findByEmail.mockResolvedValue(mockUser);
 
       await expect(
-        service.register({ email: 'test@sovlens.com', password: 'password123' }),
+        service.register({
+          email: 'test@sovlens.com',
+          password: 'password123',
+        }),
       ).rejects.toThrow(ConflictException);
 
       expect(usersService.create).not.toHaveBeenCalled();
@@ -124,11 +127,14 @@ describe('AuthService', () => {
       expect(authRepository.createRefreshToken).toHaveBeenCalled();
     });
 
-    it('devrait rejeter si l\'utilisateur n\'existe pas', async () => {
+    it("devrait rejeter si l'utilisateur n'existe pas", async () => {
       usersService.findByEmail.mockResolvedValue(undefined);
 
       await expect(
-        service.login({ email: 'inconnu@sovlens.com', password: 'password123' }),
+        service.login({
+          email: 'inconnu@sovlens.com',
+          password: 'password123',
+        }),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -186,11 +192,13 @@ describe('AuthService', () => {
   });
 
   describe('forgotPassword', () => {
-    it('devrait envoyer un email si l\'utilisateur existe', async () => {
+    it("devrait envoyer un email si l'utilisateur existe", async () => {
       usersService.findByEmail.mockResolvedValue(mockUser);
       authRepository.createPasswordResetToken.mockResolvedValue({} as any);
 
-      const result = await service.forgotPassword({ email: 'test@sovlens.com' });
+      const result = await service.forgotPassword({
+        email: 'test@sovlens.com',
+      });
 
       expect(mailerService.sendMail).toHaveBeenCalled();
       expect(result).toEqual({
@@ -198,10 +206,12 @@ describe('AuthService', () => {
       });
     });
 
-    it('ne devrait pas révéler si l\'email n\'existe pas', async () => {
+    it("ne devrait pas révéler si l'email n'existe pas", async () => {
       usersService.findByEmail.mockResolvedValue(undefined);
 
-      const result = await service.forgotPassword({ email: 'inconnu@sovlens.com' });
+      const result = await service.forgotPassword({
+        email: 'inconnu@sovlens.com',
+      });
 
       expect(mailerService.sendMail).not.toHaveBeenCalled();
       expect(result).toEqual({
@@ -236,7 +246,9 @@ describe('AuthService', () => {
         mockUser.id,
         'new-hashed-password',
       );
-      expect(authRepository.deleteAllRefreshTokens).toHaveBeenCalledWith(mockUser.id);
+      expect(authRepository.deleteAllRefreshTokens).toHaveBeenCalledWith(
+        mockUser.id,
+      );
       expect(result).toEqual({ message: 'Mot de passe modifié avec succès' });
     });
 

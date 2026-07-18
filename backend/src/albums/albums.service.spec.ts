@@ -78,7 +78,10 @@ describe('AlbumsService', () => {
 
       const result = await service.create(userId, { name: 'Vacances été' });
 
-      expect(albumsRepository.create).toHaveBeenCalledWith(userId, 'Vacances été');
+      expect(albumsRepository.create).toHaveBeenCalledWith(
+        userId,
+        'Vacances été',
+      );
       expect(result).toEqual(mockAlbum);
     });
   });
@@ -94,7 +97,7 @@ describe('AlbumsService', () => {
       expect(result.photos).toHaveLength(1);
     });
 
-    it('devrait rejeter si l\'album n\'existe pas', async () => {
+    it("devrait rejeter si l'album n'existe pas", async () => {
       albumsRepository.findById.mockResolvedValue(undefined as any);
 
       await expect(service.findOne(userId, albumId)).rejects.toThrow(
@@ -102,7 +105,7 @@ describe('AlbumsService', () => {
       );
     });
 
-    it('devrait rejeter si l\'album appartient à un autre utilisateur', async () => {
+    it("devrait rejeter si l'album appartient à un autre utilisateur", async () => {
       albumsRepository.findById.mockResolvedValue({
         ...mockAlbum,
         userId: 'other-user-id',
@@ -115,20 +118,25 @@ describe('AlbumsService', () => {
   });
 
   describe('update', () => {
-    it('devrait mettre à jour le nom de l\'album', async () => {
+    it("devrait mettre à jour le nom de l'album", async () => {
       albumsRepository.findById.mockResolvedValue(mockAlbum);
       albumsRepository.update.mockResolvedValue({
         ...mockAlbum,
         name: 'Nouveau nom',
       });
 
-      const result = await service.update(userId, albumId, { name: 'Nouveau nom' });
+      const result = await service.update(userId, albumId, {
+        name: 'Nouveau nom',
+      });
 
-      expect(albumsRepository.update).toHaveBeenCalledWith(albumId, 'Nouveau nom');
+      expect(albumsRepository.update).toHaveBeenCalledWith(
+        albumId,
+        'Nouveau nom',
+      );
       expect(result.name).toBe('Nouveau nom');
     });
 
-    it('devrait rejeter si l\'utilisateur n\'est pas propriétaire', async () => {
+    it("devrait rejeter si l'utilisateur n'est pas propriétaire", async () => {
       albumsRepository.findById.mockResolvedValue({
         ...mockAlbum,
         userId: 'other-user-id',
@@ -151,7 +159,7 @@ describe('AlbumsService', () => {
       expect(result).toEqual({ message: 'Album supprimé avec succès' });
     });
 
-    it('devrait rejeter si l\'album n\'existe pas', async () => {
+    it("devrait rejeter si l'album n'existe pas", async () => {
       albumsRepository.findById.mockResolvedValue(undefined as any);
 
       await expect(service.delete(userId, albumId)).rejects.toThrow(
@@ -161,7 +169,7 @@ describe('AlbumsService', () => {
   });
 
   describe('addPhoto', () => {
-    it('devrait ajouter une photo à l\'album', async () => {
+    it("devrait ajouter une photo à l'album", async () => {
       albumsRepository.findById.mockResolvedValue(mockAlbum);
       photosRepository.findById.mockResolvedValue(mockPhoto);
       albumsRepository.photoExistsInAlbum.mockResolvedValue(false);
@@ -174,7 +182,7 @@ describe('AlbumsService', () => {
       expect(result).toHaveProperty('photos');
     });
 
-    it('devrait rejeter si la photo n\'existe pas', async () => {
+    it("devrait rejeter si la photo n'existe pas", async () => {
       albumsRepository.findById.mockResolvedValue(mockAlbum);
       photosRepository.findById.mockResolvedValue(undefined as any);
 
@@ -195,7 +203,7 @@ describe('AlbumsService', () => {
       ).rejects.toThrow(ForbiddenException);
     });
 
-    it('devrait rejeter si la photo est déjà dans l\'album', async () => {
+    it("devrait rejeter si la photo est déjà dans l'album", async () => {
       albumsRepository.findById.mockResolvedValue(mockAlbum);
       photosRepository.findById.mockResolvedValue(mockPhoto);
       albumsRepository.photoExistsInAlbum.mockResolvedValue(true);
@@ -207,18 +215,21 @@ describe('AlbumsService', () => {
   });
 
   describe('removePhoto', () => {
-    it('devrait retirer une photo de l\'album', async () => {
+    it("devrait retirer une photo de l'album", async () => {
       albumsRepository.findById.mockResolvedValue(mockAlbum);
       albumsRepository.photoExistsInAlbum.mockResolvedValue(true);
       albumsRepository.removePhoto.mockResolvedValue(undefined);
 
       const result = await service.removePhoto(userId, albumId, photoId);
 
-      expect(albumsRepository.removePhoto).toHaveBeenCalledWith(albumId, photoId);
-      expect(result).toEqual({ message: 'Photo retirée de l\'album' });
+      expect(albumsRepository.removePhoto).toHaveBeenCalledWith(
+        albumId,
+        photoId,
+      );
+      expect(result).toEqual({ message: "Photo retirée de l'album" });
     });
 
-    it('devrait rejeter si la photo n\'est pas dans l\'album', async () => {
+    it("devrait rejeter si la photo n'est pas dans l'album", async () => {
       albumsRepository.findById.mockResolvedValue(mockAlbum);
       albumsRepository.photoExistsInAlbum.mockResolvedValue(false);
 

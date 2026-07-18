@@ -20,7 +20,9 @@ export class JwtGuard implements CanActivate {
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync<Record<string, unknown>>(token, {
+      const payload = await this.jwtService.verifyAsync<
+        Record<string, unknown>
+      >(token, {
         secret: process.env.JWT_SECRET,
       });
       (request as FastifyRequest & { user: unknown }).user = payload;

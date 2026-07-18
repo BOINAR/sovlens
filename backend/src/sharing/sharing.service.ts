@@ -108,7 +108,9 @@ export class SharingService {
       const album = await this.albumsRepository.findById(link.albumId);
       if (!album) throw new NotFoundException('Album introuvable');
 
-      const photos = await this.albumsRepository.findPhotosInAlbum(link.albumId);
+      const photos = await this.albumsRepository.findPhotosInAlbum(
+        link.albumId,
+      );
       const photosWithUrls = await Promise.all(
         photos.map(async (photo) => ({
           ...photo,
@@ -143,7 +145,8 @@ export class SharingService {
     return Promise.all(
       links.map(async (link) => {
         const now = new Date();
-        const status = link.expiresAt && now > link.expiresAt ? 'expired' : 'active';
+        const status =
+          link.expiresAt && now > link.expiresAt ? 'expired' : 'active';
 
         if (link.photoId) {
           const photo = await this.photosRepository.findById(link.photoId);

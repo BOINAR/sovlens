@@ -3,7 +3,9 @@ import { z } from 'zod/v4';
 // Inscription — l'utilisateur envoie un mot de passe en clair
 export const registerSchema = z.object({
   email: z.email(),
-  password: z.string().min(8, 'Le mot de passe doit contenir au moins 8 caractères'),
+  password: z
+    .string()
+    .min(8, 'Le mot de passe doit contenir au moins 8 caractères'),
 });
 
 // Connexion
@@ -20,7 +22,9 @@ export const forgotPasswordSchema = z.object({
 // Réinitialisation du mot de passe
 export const resetPasswordSchema = z.object({
   token: z.string().min(1),
-  password: z.string().min(8, 'Le mot de passe doit contenir au moins 8 caractères'),
+  password: z
+    .string()
+    .min(8, 'Le mot de passe doit contenir au moins 8 caractères'),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

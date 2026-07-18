@@ -16,27 +16,24 @@ describe('UsersRepository', () => {
     updatedAt: new Date(),
   };
 
-const resetMockDb = () => {
-  mockDb = {
-    insert: jest.fn().mockReturnThis(),
-    values: jest.fn().mockReturnThis(),
-    returning: jest.fn().mockResolvedValue([mockUser]),
-    select: jest.fn().mockReturnThis(),
-    from: jest.fn().mockReturnThis(),
-    where: jest.fn().mockReturnThis(),
-    update: jest.fn().mockReturnThis(),
-    set: jest.fn().mockReturnThis(),
+  const resetMockDb = () => {
+    mockDb = {
+      insert: jest.fn().mockReturnThis(),
+      values: jest.fn().mockReturnThis(),
+      returning: jest.fn().mockResolvedValue([mockUser]),
+      select: jest.fn().mockReturnThis(),
+      from: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      update: jest.fn().mockReturnThis(),
+      set: jest.fn().mockReturnThis(),
+    };
   };
-};
 
   beforeEach(async () => {
     resetMockDb();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UsersRepository,
-        { provide: DRIZZLE, useValue: mockDb },
-      ],
+      providers: [UsersRepository, { provide: DRIZZLE, useValue: mockDb }],
     }).compile();
 
     repository = module.get<UsersRepository>(UsersRepository);
@@ -44,7 +41,10 @@ const resetMockDb = () => {
 
   describe('create', () => {
     it('devrait créer un utilisateur', async () => {
-      const data = { email: 'test@sovlens.com', passwordHash: 'hashed-password' };
+      const data = {
+        email: 'test@sovlens.com',
+        passwordHash: 'hashed-password',
+      };
 
       const result = await repository.create(data);
 

@@ -49,8 +49,6 @@ export class SharingRepository {
   }
 
   async delete(id: string) {
-    await this.db
-      .delete(shareLinksTable)
-      .where(eq(shareLinksTable.id, id));
+    await this.db.delete(shareLinksTable).where(eq(shareLinksTable.id, id));
   }
 }

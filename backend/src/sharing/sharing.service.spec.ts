@@ -97,7 +97,7 @@ describe('SharingService', () => {
       expect(result).toHaveProperty('url');
     });
 
-    it('devrait rejeter si la photo n\'existe pas', async () => {
+    it("devrait rejeter si la photo n'existe pas", async () => {
       photosRepository.findById.mockResolvedValue(undefined as any);
 
       await expect(
@@ -105,7 +105,7 @@ describe('SharingService', () => {
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('devrait rejeter si l\'utilisateur n\'est pas propriétaire', async () => {
+    it("devrait rejeter si l'utilisateur n'est pas propriétaire", async () => {
       photosRepository.findById.mockResolvedValue({
         ...mockPhoto,
         userId: 'other-user-id',
@@ -131,7 +131,7 @@ describe('SharingService', () => {
       expect(result).toHaveProperty('token');
     });
 
-    it('devrait rejeter si l\'album n\'existe pas', async () => {
+    it("devrait rejeter si l'album n'existe pas", async () => {
       albumsRepository.findById.mockResolvedValue(undefined as any);
 
       await expect(
@@ -199,7 +199,7 @@ describe('SharingService', () => {
       expect(result).toEqual({ message: 'Lien de partage révoqué' });
     });
 
-    it('devrait rejeter si l\'utilisateur n\'est pas propriétaire', async () => {
+    it("devrait rejeter si l'utilisateur n'est pas propriétaire", async () => {
       sharingRepository.findByToken.mockResolvedValue({
         ...mockShareLink,
         userId: 'other-user-id',

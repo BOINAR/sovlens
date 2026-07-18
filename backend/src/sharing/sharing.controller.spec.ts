@@ -70,7 +70,11 @@ describe('SharingController', () => {
         {},
       );
 
-      expect(service.createPhotoShareLink).toHaveBeenCalledWith(userId, photoId, {});
+      expect(service.createPhotoShareLink).toHaveBeenCalledWith(
+        userId,
+        photoId,
+        {},
+      );
       expect(result).toEqual(mockShareLinkResponse);
     });
   });
@@ -85,14 +89,20 @@ describe('SharingController', () => {
         {},
       );
 
-      expect(service.createAlbumShareLink).toHaveBeenCalledWith(userId, albumId, {});
+      expect(service.createAlbumShareLink).toHaveBeenCalledWith(
+        userId,
+        albumId,
+        {},
+      );
       expect(result).toEqual(mockShareLinkResponse);
     });
   });
 
   describe('revokeShareLink', () => {
     it('devrait révoquer un lien de partage', async () => {
-      service.revokeShareLink.mockResolvedValue({ message: 'Lien de partage révoqué' });
+      service.revokeShareLink.mockResolvedValue({
+        message: 'Lien de partage révoqué',
+      });
 
       const result = await controller.revokeShareLink(
         { sub: userId, email: 'test@sovlens.com' },

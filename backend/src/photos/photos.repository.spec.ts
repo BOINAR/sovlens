@@ -39,10 +39,7 @@ describe('PhotosRepository', () => {
     resetMockDb();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        PhotosRepository,
-        { provide: DRIZZLE, useValue: mockDb },
-      ],
+      providers: [PhotosRepository, { provide: DRIZZLE, useValue: mockDb }],
     }).compile();
 
     repository = module.get<PhotosRepository>(PhotosRepository);
@@ -69,7 +66,7 @@ describe('PhotosRepository', () => {
   });
 
   describe('findAllByUserId', () => {
-    it('devrait retourner toutes les photos d\'un utilisateur triées par date', async () => {
+    it("devrait retourner toutes les photos d'un utilisateur triées par date", async () => {
       mockDb.orderBy.mockResolvedValue([mockPhoto]);
 
       const result = await repository.findAllByUserId(userId);

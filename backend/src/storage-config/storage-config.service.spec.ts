@@ -40,7 +40,7 @@ describe('StorageConfigService', () => {
   });
 
   describe('getConfig', () => {
-    it('devrait retourner le mode cloud par défaut si aucun profil n\'existe', async () => {
+    it("devrait retourner le mode cloud par défaut si aucun profil n'existe", async () => {
       storageConfigRepository.findByUserId.mockResolvedValue(undefined as any);
 
       const result = await service.getConfig(userId);

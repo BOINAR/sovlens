@@ -52,7 +52,10 @@ export class AuthService {
       throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
 
-    const isPasswordValid = await argon2.verify(user.passwordHash, data.password);
+    const isPasswordValid = await argon2.verify(
+      user.passwordHash,
+      data.password,
+    );
     if (!isPasswordValid) {
       throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
@@ -72,13 +75,19 @@ export class AuthService {
     const stored = await this.authRepository.findRefreshToken(tokenHash);
 
     if (!stored) {
-      throw new UnauthorizedException('Session expirée, veuillez vous reconnecter');
+      throw new UnauthorizedException(
+        'Session expirée, veuillez vous reconnecter',
+      );
     }
 
     const user = await this.usersService.findById(stored.userId);
 
     await this.authRepository.deleteRefreshToken(tokenHash);
-    const { rawToken, tokenHash: newHash, expiresAt } = this.generateRefreshToken();
+    const {
+      rawToken,
+      tokenHash: newHash,
+      expiresAt,
+    } = this.generateRefreshToken();
     await this.authRepository.createRefreshToken(user.id, newHash, expiresAt);
 
     const accessToken = await this.generateAccessToken(user.id, user.email);
@@ -107,7 +116,11 @@ export class AuthService {
     const tokenHash = this.hashToken(rawToken);
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1h
 
-    await this.authRepository.createPasswordResetToken(user.id, tokenHash, expiresAt);
+    await this.authRepository.createPasswordResetToken(
+      user.id,
+      tokenHash,
+      expiresAt,
+    );
 
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`;
 
