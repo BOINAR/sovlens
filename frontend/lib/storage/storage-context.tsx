@@ -2,12 +2,13 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { storageApi } from '../api/endpoints';
-import { StorageConfig, StorageMode } from '../api/types';
+import { StorageConfig, UpdateStorageConfigRequest } from '../api/types';
 
 interface StorageContextValue {
   config: StorageConfig | null;
   loading: boolean;
-  setMode: (mode: StorageMode) => Promise<void>;
+  setCloudMode: () => Promise<void>;
+  setSovereignConfig: (data: Omit<UpdateStorageConfigRequest, 'mode'>) => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -31,23 +32,25 @@ export function StorageProvider({ children }: { children: ReactNode }) {
     refresh();
   }, [refresh]);
 
-  const setMode = useCallback(
-    async (mode: StorageMode) => {
-      const previous = config;
-      setConfig((c) => (c ? { ...c, mode } : c));
-      try {
-        const updated = await storageApi.updateConfig({ mode });
-        setConfig(updated);
-      } catch (err) {
-        setConfig(previous);
-        throw err;
-      }
-    },
-    [config]
-  );
+  const setCloudMode = useCallback(async () => {
+    const previous = config;
+    setConfig((c) => (c ? { ...c, mode: 'cloud' } : c));
+    try {
+      const updated = await storageApi.updateConfig({ mode: 'cloud' });
+      setConfig(updated);
+    } catch (err) {
+      setConfig(previous);
+      throw err;
+    }
+  }, [config]);
+
+  const setSovereignConfig = useCallback(async (data: Omit<UpdateStorageConfigRequest, 'mode'>) => {
+    const updated = await storageApi.updateConfig({ mode: 'sovereign', ...data });
+    setConfig(updated);
+  }, []);
 
   return (
-    <StorageContext.Provider value={{ config, loading, setMode, refresh }}>
+    <StorageContext.Provider value={{ config, loading, setCloudMode, setSovereignConfig, refresh }}>
       {children}
     </StorageContext.Provider>
   );

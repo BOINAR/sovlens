@@ -32,7 +32,7 @@ function NavLink({ item, active, onNavigate }: { item: { href: string; label: st
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { user, logout } = useAuth();
-  const { config, setMode } = useStorageMode();
+  const { config, setCloudMode } = useStorageMode();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const isSovereign = config?.mode === 'sovereign';
@@ -69,7 +69,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           {isSovereign ? 'Sur vos propres serveurs' : 'Serveurs SovLens · UE'}
         </div>
         <button
-          onClick={() => setMode(isSovereign ? 'cloud' : 'sovereign')}
+          onClick={() => (isSovereign ? setCloudMode() : (window.location.href = '/settings'))}
           className="w-full bg-sv-surface2 border border-[#333b46] text-sv-text2 py-1.5 rounded-lg text-xs font-semibold"
         >
           Basculer
@@ -110,7 +110,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 function AppShellInner({ children }: { children: React.ReactNode }) {
-  const { config, setMode } = useStorageMode();
+  const { config, setCloudMode } = useStorageMode();
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -165,7 +165,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
 
           <div className="flex bg-sv-surface2 border border-sv-border rounded-lg p-0.5 ml-auto sm:ml-0">
             <button
-              onClick={() => setMode('cloud')}
+              onClick={() => setCloudMode()}
               className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-md text-[12.5px] font-semibold"
               style={{
                 background: !isSovereign ? 'var(--sv-soft)' : 'transparent',
@@ -176,7 +176,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
               <span className="hidden sm:inline">Cloud</span>
             </button>
             <button
-              onClick={() => setMode('sovereign')}
+              onClick={() => { window.location.href = '/settings'; }}
               className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-md text-[12.5px] font-semibold"
               style={{
                 background: isSovereign ? 'var(--sv-soft)' : 'transparent',
