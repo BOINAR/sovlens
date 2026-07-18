@@ -32,10 +32,19 @@ function NavLink({ item, active, onNavigate }: { item: { href: string; label: st
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { user, logout } = useAuth();
-  const { config, setCloudMode } = useStorageMode();
+  const { config, setCloudMode, setSovereignConfig } = useStorageMode();
   const pathname = usePathname();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const isSovereign = config?.mode === 'sovereign';
+
+  async function setSovereignQuick() {
+    try {
+      await setSovereignConfig({});
+    } catch {
+      router.push('/settings');
+    }
+  }
 
   return (
     <div className="flex flex-col h-full p-3.5">
@@ -69,7 +78,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           {isSovereign ? 'Sur vos propres serveurs' : 'Serveurs SovLens · UE'}
         </div>
         <button
-          onClick={() => (isSovereign ? setCloudMode() : (window.location.href = '/settings'))}
+          onClick={() => (isSovereign ? setCloudMode() : setSovereignQuick())}
           className="w-full bg-sv-surface2 border border-[#333b46] text-sv-text2 py-1.5 rounded-lg text-xs font-semibold"
         >
           Basculer
@@ -110,12 +119,21 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 function AppShellInner({ children }: { children: React.ReactNode }) {
-  const { config, setCloudMode } = useStorageMode();
+  const { config, setCloudMode, setSovereignConfig } = useStorageMode();
   const pathname = usePathname();
+  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const isSovereign = config?.mode === 'sovereign';
   const pageTitle = Object.entries(PAGE_TITLES).find(([href]) => pathname?.startsWith(href))?.[1] || 'SovLens';
+
+  async function setSovereignQuick() {
+    try {
+      await setSovereignConfig({});
+    } catch {
+      router.push('/settings');
+    }
+  }
 
   useEffect(() => {
     if (config) document.body.setAttribute('data-mode', config.mode);
@@ -176,7 +194,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
               <span className="hidden sm:inline">Cloud</span>
             </button>
             <button
-              onClick={() => { window.location.href = '/settings'; }}
+              onClick={setSovereignQuick}
               className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-md text-[12.5px] font-semibold"
               style={{
                 background: isSovereign ? 'var(--sv-soft)' : 'transparent',

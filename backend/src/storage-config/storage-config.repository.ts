@@ -17,27 +17,34 @@ export class StorageConfigRepository {
   }
 
   async upsert(userId: string, data: UpdateStorageConfigInput) {
+    const hasNewSovereignFields = data.mode === 'sovereign' && !!data.endpoint;
+
     const [profile] = await this.db
       .insert(storageProfilesTable)
       .values({
         userId,
         mode: data.mode,
-        endpoint: data.mode === 'sovereign' ? data.endpoint : null,
-        accessKey: data.mode === 'sovereign' ? data.accessKey : null,
-        secretKey: data.mode === 'sovereign' ? data.secretKey : null,
-        bucket: data.mode === 'sovereign' ? data.bucket : null,
+        endpoint: hasNewSovereignFields ? data.endpoint : null,
+        accessKey: hasNewSovereignFields ? data.accessKey : null,
+        secretKey: hasNewSovereignFields ? data.secretKey : null,
+        bucket: hasNewSovereignFields ? data.bucket : null,
         updatedAt: new Date(),
       })
       .onConflictDoUpdate({
         target: storageProfilesTable.userId,
-        set: {
-          mode: data.mode,
-          endpoint: data.mode === 'sovereign' ? data.endpoint : null,
-          accessKey: data.mode === 'sovereign' ? data.accessKey : null,
-          secretKey: data.mode === 'sovereign' ? data.secretKey : null,
-          bucket: data.mode === 'sovereign' ? data.bucket : null,
-          updatedAt: new Date(),
-        },
+        set: hasNewSovereignFields
+          ? {
+              mode: data.mode,
+              endpoint: data.endpoint,
+              accessKey: data.accessKey,
+              secretKey: data.secretKey,
+              bucket: data.bucket,
+              updatedAt: new Date(),
+            }
+          : {
+              mode: data.mode,
+              updatedAt: new Date(),
+            },
       })
       .returning();
     return profile;

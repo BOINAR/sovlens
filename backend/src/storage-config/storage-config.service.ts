@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { StorageConfigRepository } from './storage-config.repository';
 import { UpdateStorageConfigInput } from './storage-config.validation';
 
@@ -12,11 +12,9 @@ export class StorageConfigService {
     const profile = await this.storageConfigRepository.findByUserId(userId);
 
     if (!profile) {
-      // Par défaut, mode cloud
       return { mode: 'cloud', endpoint: null, bucket: null };
     }
 
-    // On ne retourne jamais les credentials au client
     return {
       mode: profile.mode,
       endpoint: profile.endpoint,
@@ -25,6 +23,15 @@ export class StorageConfigService {
   }
 
   async updateConfig(userId: string, data: UpdateStorageConfigInput) {
+    if (data.mode === 'sovereign' && !data.endpoint) {
+      const existing = await this.storageConfigRepository.findByUserId(userId);
+      if (!existing?.endpoint || !existing?.accessKey || !existing?.secretKey || !existing?.bucket) {
+        throw new BadRequestException(
+          'Aucune configuration souveraine enregistrée. Renseignez vos identifiants S3 dans les Paramètres.',
+        );
+      }
+    }
+
     const profile = await this.storageConfigRepository.upsert(userId, data);
 
     return {
