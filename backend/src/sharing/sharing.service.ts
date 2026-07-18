@@ -92,7 +92,6 @@ export class SharingService {
       throw new NotFoundException('Lien de partage introuvable');
     }
 
-    // Vérifie l'expiration
     if (link.expiresAt && new Date() > link.expiresAt) {
       throw new NotFoundException('Lien de partage expiré');
     }
@@ -136,5 +135,44 @@ export class SharingService {
 
     await this.sharingRepository.delete(link.id);
     return { message: 'Lien de partage révoqué' };
+  }
+
+  async listMyShareLinks(userId: string) {
+    const links = await this.sharingRepository.findAllByUserId(userId);
+
+    return Promise.all(
+      links.map(async (link) => {
+        const now = new Date();
+        const status = link.expiresAt && now > link.expiresAt ? 'expired' : 'active';
+
+        if (link.photoId) {
+          const photo = await this.photosRepository.findById(link.photoId);
+          return {
+            token: link.token,
+            url: `${process.env.FRONTEND_URL}/share/${link.token}`,
+            type: 'photo' as const,
+            name: photo?.filename ?? 'Photo supprimée',
+            storageMode: photo?.storageMode ?? null,
+            status,
+            expiresAt: link.expiresAt,
+            createdAt: link.createdAt,
+          };
+        }
+
+        const album = link.albumId
+          ? await this.albumsRepository.findById(link.albumId)
+          : null;
+        return {
+          token: link.token,
+          url: `${process.env.FRONTEND_URL}/share/${link.token}`,
+          type: 'album' as const,
+          name: album?.name ?? 'Album supprimé',
+          storageMode: null,
+          status,
+          expiresAt: link.expiresAt,
+          createdAt: link.createdAt,
+        };
+      }),
+    );
   }
 }

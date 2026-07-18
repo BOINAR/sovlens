@@ -24,6 +24,13 @@ export class SharingController {
     return this.sharingService.getSharedResource(token);
   }
 
+  // Liste des liens de l'utilisateur connecté
+  @Get()
+  @UseGuards(JwtGuard)
+  listMyShareLinks(@CurrentUser() user: { sub: string; email: string }) {
+    return this.sharingService.listMyShareLinks(user.sub);
+  }
+
   // Routes protégées
   @Post('photos/:id')
   @UseGuards(JwtGuard)

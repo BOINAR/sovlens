@@ -41,6 +41,13 @@ export class SharingRepository {
     return link;
   }
 
+  async findAllByUserId(userId: string) {
+    return this.db
+      .select()
+      .from(shareLinksTable)
+      .where(eq(shareLinksTable.userId, userId));
+  }
+
   async delete(id: string) {
     await this.db
       .delete(shareLinksTable)
