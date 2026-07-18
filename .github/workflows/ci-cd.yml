@@ -120,6 +120,8 @@ jobs:
         with:
           context: ./frontend
           push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=https://sovlens-api.stellodev.com
           tags: |
             ghcr.io/${{ env.IMAGE_FRONTEND }}:latest
             ghcr.io/${{ env.IMAGE_FRONTEND }}:${{ github.sha }}
