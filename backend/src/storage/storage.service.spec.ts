@@ -49,18 +49,17 @@ describe('StorageService', () => {
 
   describe('getProvider — Strategy Pattern', () => {
     it('devrait retourner le CloudStorageProvider par défaut (pas de profil)', () => {
-      const provider = service.getProvider(undefined);
+      const provider = service.getProvider('cloud', undefined);
       expect(provider).toBeInstanceOf(CloudStorageProvider);
     });
 
     it('devrait retourner le CloudStorageProvider si mode = cloud', () => {
-      const provider = service.getProvider({ mode: 'cloud' });
+      const provider = service.getProvider('cloud', undefined);
       expect(provider).toBeInstanceOf(CloudStorageProvider);
     });
 
     it('devrait retourner le SovereignStorageProvider si profil complet et mode = sovereign', () => {
-      const provider = service.getProvider({
-        mode: 'sovereign',
+      const provider = service.getProvider('sovereign', {
         endpoint: 'http://192.168.1.20:3900',
         accessKey: 'access-key',
         secretKey: 'secret-key',
@@ -70,8 +69,7 @@ describe('StorageService', () => {
     });
 
     it('devrait retourner le CloudStorageProvider si mode = sovereign mais profil incomplet', () => {
-      const provider = service.getProvider({
-        mode: 'sovereign',
+      const provider = service.getProvider('sovereign', {
         endpoint: 'http://192.168.1.20:3900',
         // accessKey manquant
         secretKey: 'secret-key',
