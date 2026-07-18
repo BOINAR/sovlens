@@ -21,6 +21,15 @@ const PAGE_TITLES: Record<string, string> = {
   '/settings': 'Paramètres',
 };
 
+function NavLink({ item, active, onNavigate }: { item: { href: string; label: string }; active: boolean; onNavigate?: () => void }) {
+  return (
+    <a key={item.href} href={item.href} onClick={onNavigate} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold" style={{ background: active ? 'var(--sv-soft)' : 'transparent', color: active ? 'var(--color-sv-text)' : 'var(--color-sv-text2)' }}>
+      <span className="w-2 h-2 rounded-full shrink-0" style={{ background: active ? 'var(--color-sv-accent)' : 'transparent', border: active ? 'none' : '1.5px solid #454d58', boxShadow: active ? '0 0 10px var(--sv-ring)' : 'none' }} />
+      {item.label}
+    </a>
+  );
+}
+
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { user, logout } = useAuth();
   const { config, setMode } = useStorageMode();
@@ -38,31 +47,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       <nav className="flex flex-col gap-0.75">
-        {NAV_ITEMS.map((item) => {
-          const active = pathname?.startsWith(item.href);
-          return (
-            
-              key={item.href}
-              href={item.href}
-              onClick={onNavigate}
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold"
-              style={{
-                background: active ? 'var(--sv-soft)' : 'transparent',
-                color: active ? 'var(--color-sv-text)' : 'var(--color-sv-text2)',
-              }}
-            >
-              <span
-                className="w-2 h-2 rounded-full shrink-0"
-                style={{
-                  background: active ? 'var(--color-sv-accent)' : 'transparent',
-                  border: active ? 'none' : '1.5px solid #454d58',
-                  boxShadow: active ? '0 0 10px var(--sv-ring)' : 'none',
-                }}
-              />
-              {item.label}
-            </a>
-          );
-        })}
+        {NAV_ITEMS.map((item) => (
+          <NavLink key={item.href} item={item} active={!!pathname?.startsWith(item.href)} onNavigate={onNavigate} />
+        ))}
       </nav>
 
       <div className="flex-1" />
