@@ -39,7 +39,7 @@ export const photosApi = {
   upload: (file: File) => {
     const form = new FormData();
     form.append('file', file);
-    return apiClient.postForm<Photo>('/photos', form);
+    return apiClient.postForm<Photo>('/photos/upload', form);
   },
   remove: (id: string) => apiClient.delete<void>(`/photos/${id}`),
   downloadBlob: (id: string) => apiClient.get<Blob>(`/photos/${id}/download`),
