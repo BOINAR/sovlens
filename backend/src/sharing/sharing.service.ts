@@ -151,7 +151,7 @@ export class SharingService {
             token: link.token,
             url: `${process.env.FRONTEND_URL}/share/${link.token}`,
             type: 'photo' as const,
-            name: photo?.filename ?? 'Photo supprimée',
+            name: photo?.originalName ?? 'Photo supprimée',
             storageMode: photo?.storageMode ?? null,
             status,
             expiresAt: link.expiresAt,

@@ -1,5 +1,5 @@
 import { apiClient, setAccessToken } from './client';
-import { Album, AuthResponse, Photo, ShareLink, SharedResource, StorageConfig, UpdateStorageConfigRequest, User } from './types';
+import { Album, AuthResponse, Photo, ShareLink, ShareLinkSummary, SharedResource, StorageConfig, UpdateStorageConfigRequest, User } from './types';
 
 export const authApi = {
   async register(email: string, password: string) {
@@ -61,6 +61,8 @@ export const sharingApi = {
   shareAlbum: (albumId: string, expiresAt?: string | null) =>
     apiClient.post<ShareLink>(`/sharing/albums/${albumId}`, expiresAt !== undefined ? { expiresAt } : undefined),
   getShared: (token: string) => apiClient.public<SharedResource>(`/shared/${token}`),
+  listMine: () => apiClient.get<ShareLinkSummary[]>('/sharing'),
+  revoke: (token: string) => apiClient.delete<void>(`/sharing/${token}`),
 };
 
 export const storageApi = {

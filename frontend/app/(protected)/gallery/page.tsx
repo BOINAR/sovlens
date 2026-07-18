@@ -82,7 +82,7 @@ export default function GalleryPage() {
         </div>
       )}
 
-      <div className="[column-width:230px] [column-gap:14px]">
+      <div className="[column-width:230px] gap-x-3.5">
         {photos.map((photo, i) => (
           <button
             key={photo.id}
@@ -90,10 +90,10 @@ export default function GalleryPage() {
             className="block w-full break-inside-avoid mb-3.5 rounded-xl overflow-hidden border border-[#20262f] relative text-left hover:border-sv-accent transition-colors"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={photo.url} alt={photo.filename} className="w-full h-auto block" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
+            <img src={photo.url} alt={photo.originalName} className="w-full h-auto block" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent pointer-events-none" />
             <div className="absolute left-2.5 bottom-2 font-mono text-[10.5px] text-white/70 truncate max-w-[85%]">
-              {photo.filename}
+              {photo.originalName}
             </div>
             <span
               className="absolute top-2 right-2 text-[10px] font-semibold px-2 py-0.5 rounded-full"
@@ -113,14 +113,14 @@ export default function GalleryPage() {
           <div className="flex-1 flex items-center justify-center relative p-4 md:p-10">
             <button
               onClick={() => setOpenIndex(null)}
-              className="absolute top-4 left-4 md:top-5.5 md:left-5.5 w-9 h-9 md:w-9.5 md:h-9.5 rounded-full bg-white/[.06] border border-[#333b46] flex items-center justify-center text-sv-text2"
+              className="absolute top-4 left-4 md:top-5.5 md:left-5.5 w-9 h-9 md:w-9.5 md:h-9.5 rounded-full bg-white/6 border border-[#333b46] flex items-center justify-center text-sv-text2"
             >
               ✕
             </button>
             {openIndex! > 0 && (
               <button
                 onClick={() => setOpenIndex((i) => (i !== null ? i - 1 : i))}
-                className="hidden md:flex absolute left-5.5 top-1/2 -translate-y-1/2 w-10.5 h-10.5 rounded-full bg-white/[.06] border border-[#333b46] items-center justify-center"
+                className="hidden md:flex absolute left-5.5 top-1/2 -translate-y-1/2 w-10.5 h-10.5 rounded-full bg-white/6 border border-[#333b46] items-center justify-center"
               >
                 ←
               </button>
@@ -128,7 +128,7 @@ export default function GalleryPage() {
             {openIndex! < photos.length - 1 && (
               <button
                 onClick={() => setOpenIndex((i) => (i !== null ? i + 1 : i))}
-                className="hidden md:flex absolute right-5.5 top-1/2 -translate-y-1/2 w-10.5 h-10.5 rounded-full bg-white/[.06] border border-[#333b46] items-center justify-center"
+                className="hidden md:flex absolute right-5.5 top-1/2 -translate-y-1/2 w-10.5 h-10.5 rounded-full bg-white/6 border border-[#333b46] items-center justify-center"
               >
                 →
               </button>
@@ -136,13 +136,13 @@ export default function GalleryPage() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={current.url}
-              alt={current.filename}
+              alt={current.originalName}
               className="max-w-full md:max-w-[80%] max-h-[50vh] md:max-h-[70%] rounded-2xl border border-[#2c333d] shadow-[0_30px_90px_rgba(0,0,0,.6)] object-contain"
             />
           </div>
 
           <div className="w-full md:w-85 flex-none bg-[#0d0f13] border-t md:border-t-0 md:border-l border-sv-border p-5 md:p-6 flex flex-col overflow-y-auto">
-            <div className="font-display font-bold text-lg mb-1 truncate">{current.filename}</div>
+            <div className="font-display font-bold text-lg mb-1 truncate">{current.originalName}</div>
             <div className="text-[12.5px] text-sv-text3 mb-5">{formatDate(current.createdAt)}</div>
 
             <span
@@ -168,7 +168,7 @@ export default function GalleryPage() {
             </div>
 
             <div className="grid gap-2.5">
-              <a href={current.url} download={current.filename} className="w-full text-center bg-sv-accent text-[#04150e] h-11 rounded-[11px] font-bold text-sm flex items-center justify-center">
+              <a href={current.url} download={current.originalName} className="w-full text-center bg-sv-accent text-[#04150e] h-11 rounded-[11px] font-bold text-sm flex items-center justify-center">
                 Télécharger l&apos;original
               </a>
               <button

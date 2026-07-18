@@ -17,6 +17,7 @@ export interface AuthResponse {
 export interface Photo {
   id: string;
   filename: string;
+  originalName: string;
   mimeType: string;
   objectKey: string;
   url: string;
@@ -35,6 +36,17 @@ export interface Album {
 export interface ShareLink {
   token: string;
   url: string;
+  expiresAt: string | null;
+  createdAt: string;
+}
+
+export interface ShareLinkSummary {
+  token: string;
+  url: string;
+  type: 'photo' | 'album';
+  name: string;
+  storageMode: StorageMode | null;
+  status: 'active' | 'expired';
   expiresAt: string | null;
   createdAt: string;
 }
