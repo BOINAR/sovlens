@@ -1,6 +1,6 @@
 import { ApiError, ApiErrorBody } from './types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 let accessToken: string | null = null;
 let refreshPromise: Promise<string | null> | null = null;
