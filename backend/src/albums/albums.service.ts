@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { AlbumsRepository } from './albums.repository';
 import { PhotosRepository } from '../photos/photos.repository';
+import { StorageService } from '../storage/storage.service';
+import { StorageConfigRepository } from '../storage-config/storage-config.repository';
 import {
   CreateAlbumInput,
   UpdateAlbumInput,
@@ -17,7 +19,25 @@ export class AlbumsService {
   constructor(
     private readonly albumsRepository: AlbumsRepository,
     private readonly photosRepository: PhotosRepository,
+    private readonly storageService: StorageService,
+    private readonly storageConfigRepository: StorageConfigRepository,
   ) {}
+
+  private async attachUrls(
+    photos: Awaited<ReturnType<AlbumsRepository['findPhotosInAlbum']>>,
+    userId: string,
+  ) {
+    const profile = await this.storageConfigRepository.findByUserId(userId);
+    return Promise.all(
+      photos.map(async (photo) => {
+        const provider = this.storageService.getProvider(photo.storageMode, profile ?? undefined);
+        return {
+          ...photo,
+          url: await provider.getSignedUrl(photo.objectKey),
+        };
+      }),
+    );
+  }
 
   async create(userId: string, data: CreateAlbumInput) {
     return this.albumsRepository.create(userId, data.name);
@@ -26,10 +46,13 @@ export class AlbumsService {
   async findAll(userId: string) {
     const albums = await this.albumsRepository.findAllByUserId(userId);
     return Promise.all(
-      albums.map(async (album) => ({
-        ...album,
-        photos: await this.albumsRepository.findPhotosInAlbum(album.id),
-      })),
+      albums.map(async (album) => {
+        const photos = await this.albumsRepository.findPhotosInAlbum(album.id);
+        return {
+          ...album,
+          photos: await this.attachUrls(photos, userId),
+        };
+      }),
     );
   }
 
@@ -45,7 +68,7 @@ export class AlbumsService {
     }
 
     const photos = await this.albumsRepository.findPhotosInAlbum(albumId);
-    return { ...album, photos };
+    return { ...album, photos: await this.attachUrls(photos, userId) };
   }
 
   async update(userId: string, albumId: string, data: UpdateAlbumInput) {
