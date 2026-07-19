@@ -9,3 +9,7 @@ sovlens.stellodev.com {
 sovlens-garage.stellodev.com {
     reverse_proxy garage:3900
 }
+
+sovlens-grafana.stellodev.com {
+    reverse_proxy grafana:3000
+}
