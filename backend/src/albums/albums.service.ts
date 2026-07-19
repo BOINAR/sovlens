@@ -24,7 +24,13 @@ export class AlbumsService {
   }
 
   async findAll(userId: string) {
-    return this.albumsRepository.findAllByUserId(userId);
+    const albums = await this.albumsRepository.findAllByUserId(userId);
+    return Promise.all(
+      albums.map(async (album) => ({
+        ...album,
+        photos: await this.albumsRepository.findPhotosInAlbum(album.id),
+      })),
+    );
   }
 
   async findOne(userId: string, albumId: string) {
