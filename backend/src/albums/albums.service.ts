@@ -30,7 +30,10 @@ export class AlbumsService {
     const profile = await this.storageConfigRepository.findByUserId(userId);
     return Promise.all(
       photos.map(async (photo) => {
-        const provider = this.storageService.getProvider(photo.storageMode, profile ?? undefined);
+        const provider = this.storageService.getProvider(
+          photo.storageMode,
+          profile ?? undefined,
+        );
         return {
           ...photo,
           url: await provider.getSignedUrl(photo.objectKey),

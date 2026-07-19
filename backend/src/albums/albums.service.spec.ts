@@ -113,9 +113,7 @@ describe('AlbumsService', () => {
 
       expect(result).toHaveProperty('photos');
       expect(result.photos).toHaveLength(1);
-      expect(result.photos[0].url).toBe(
-        'https://example.com/test.webp',
-      );
+      expect(result.photos[0].url).toBe('https://example.com/test.webp');
     });
 
     it("devrait rejeter si l'album n'existe pas", async () => {
@@ -199,15 +197,10 @@ describe('AlbumsService', () => {
 
       const result = await service.addPhoto(userId, albumId, { photoId });
 
-      expect(albumsRepository.addPhoto).toHaveBeenCalledWith(
-        albumId,
-        photoId,
-      );
+      expect(albumsRepository.addPhoto).toHaveBeenCalledWith(albumId, photoId);
       expect(result).toHaveProperty('photos');
       expect(result.photos).toHaveLength(1);
-      expect(result.photos[0].url).toBe(
-        'https://example.com/test.webp',
-      );
+      expect(result.photos[0].url).toBe('https://example.com/test.webp');
     });
 
     it("devrait rejeter si la photo n'existe pas", async () => {
@@ -248,11 +241,7 @@ describe('AlbumsService', () => {
       albumsRepository.photoExistsInAlbum.mockResolvedValue(true);
       albumsRepository.removePhoto.mockResolvedValue(undefined);
 
-      const result = await service.removePhoto(
-        userId,
-        albumId,
-        photoId,
-      );
+      const result = await service.removePhoto(userId, albumId, photoId);
 
       expect(albumsRepository.removePhoto).toHaveBeenCalledWith(
         albumId,

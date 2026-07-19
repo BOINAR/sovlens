@@ -1,4 +1,5 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
+import { IncomingMessage, ServerResponse } from 'http';
 import { Counter, Histogram } from 'prom-client';
 
 export const httpRequestsTotal = new Counter({
@@ -15,12 +16,13 @@ export const httpRequestDuration = new Histogram({
 
 @Injectable()
 export class HttpMetricsMiddleware implements NestMiddleware {
-  use(req: any, res: any, next: () => void) {
+  use(req: IncomingMessage, res: ServerResponse, next: () => void) {
     const start = Date.now();
     res.on('finish', () => {
-      const route = req.url;
+      const route = req.url ?? 'unknown';
+      const method = req.method ?? 'UNKNOWN';
       const labels = {
-        method: req.method,
+        method,
         route,
         status: String(res.statusCode),
       };

@@ -47,7 +47,10 @@ export class PhotosService {
 
     const profile = await this.storageConfigRepository.findByUserId(userId);
     const storageMode = profile?.mode === 'sovereign' ? 'sovereign' : 'cloud';
-    const provider = this.storageService.getProvider(storageMode, profile ?? undefined);
+    const provider = this.storageService.getProvider(
+      storageMode,
+      profile ?? undefined,
+    );
 
     const extension = originalName.split('.').pop();
     const objectKey = `${userId}/${randomUUID()}.${extension}`;
@@ -89,7 +92,10 @@ export class PhotosService {
 
     const photosWithUrls = await Promise.all(
       photos.map(async (photo) => {
-        const provider = this.storageService.getProvider(photo.storageMode, profile ?? undefined);
+        const provider = this.storageService.getProvider(
+          photo.storageMode,
+          profile ?? undefined,
+        );
         return {
           ...photo,
           url: await provider.getSignedUrl(photo.objectKey),
