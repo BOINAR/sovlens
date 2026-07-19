@@ -106,7 +106,8 @@ export const apiClient = {
     request<T>(path, { ...options, method: 'POST', body: JSON.stringify(body ?? {}) }),
   patch: <T>(path: string, body?: unknown, options?: RequestOptions) =>
     request<T>(path, { ...options, method: 'PATCH', body: JSON.stringify(body ?? {}) }),
-  delete: <T>(path: string, options?: RequestOptions) => request<T>(path, { ...options, method: 'DELETE' }),
+  delete: <T>(path: string, options?: RequestOptions) =>
+  request<T>(path, { ...options, method: 'DELETE', body: JSON.stringify({}) }),
   postForm: <T>(path: string, form: FormData, options?: RequestOptions) =>
     request<T>(path, { ...options, method: 'POST', body: form, isFormData: true }),
   public: <T>(path: string, options?: RequestOptions) => request<T>(path, { ...options, skipAuthRetry: true }),
