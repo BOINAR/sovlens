@@ -60,7 +60,7 @@ export const sharingApi = {
     apiClient.post<ShareLink>(`/sharing/photos/${photoId}`, expiresAt !== undefined ? { expiresAt } : undefined),
   shareAlbum: (albumId: string, expiresAt?: string | null) =>
     apiClient.post<ShareLink>(`/sharing/albums/${albumId}`, expiresAt !== undefined ? { expiresAt } : undefined),
-  getShared: (token: string) => apiClient.public<SharedResource>(`/shared/${token}`),
+  getShared: (token: string) => apiClient.public<SharedResource>(`/sharing/${token}`),
   listMine: () => apiClient.get<ShareLinkSummary[]>('/sharing'),
   revoke: (token: string) => apiClient.delete<void>(`/sharing/${token}`),
 };
