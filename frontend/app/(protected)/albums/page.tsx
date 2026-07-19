@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, FormEvent } from 'react';
+import { useEffect, useState, useCallback, SubmitEvent } from 'react';
 import { albumsApi } from '@/lib/api/endpoints';
 import { Album, ApiError } from '@/lib/api/types';
 
@@ -29,7 +29,7 @@ export default function AlbumsPage() {
     load();
   }, [load]);
 
-  async function handleCreate(e: FormEvent) {
+  async function handleCreate(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!newName.trim()) return;
     const album = await albumsApi.create(newName.trim());
@@ -60,14 +60,16 @@ export default function AlbumsPage() {
             Supprimer l&apos;album
           </button>
         </div>
-        <div className="[column-width:180px] sm:[column-width:200px] [column-gap:12px]">
-          {selected.photos.map((photo) => (
+        <div className="[column-width:180px] sm:[column-width:200px] gap-x-3">
+          {selected.photos?.map((photo) => (
             <div key={photo.id} className="break-inside-avoid mb-3 rounded-xl overflow-hidden border border-[#20262f]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo.url} alt={photo.filename} className="w-full h-auto block" />
+              <img src={photo.url} alt={photo.originalName} className="w-full h-auto block" />
             </div>
           ))}
-          {selected.photos.length === 0 && <p className="text-sv-text3 text-sm">Cet album est vide pour l&apos;instant.</p>}
+          {(!selected.photos || selected.photos.length === 0) && (
+            <p className="text-sv-text3 text-sm">Cet album est vide pour l&apos;instant.</p>
+          )}
         </div>
       </div>
     );
@@ -117,10 +119,10 @@ export default function AlbumsPage() {
                 background: 'linear-gradient(145deg,#1b212b,#262e39)',
               }}
             >
-              <div className="bg-white/[.03]" />
-              <div className="bg-white/[.06]" />
-              <div className="bg-white/[.05]" />
-              <div className="bg-black/[.15]" />
+              <div className="bg-white/3" />
+              <div className="bg-white/6" />
+              <div className="bg-white/5" />
+              <div className="bg-black/15" />
             </div>
             <div className="p-3.25">
               <div className="flex items-center justify-between mb-1">
