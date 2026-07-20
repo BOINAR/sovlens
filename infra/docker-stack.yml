@@ -105,6 +105,7 @@ services:
 networks:
   sovlens-net:
     driver: overlay
+    attachable: true
 
 volumes:
   postgres-data:
