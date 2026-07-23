@@ -1,2 +1,5 @@
 monitoring/prometheus/secrets/
 monitoring/grafana_admin_password
+.DS_Store
+**/.DS_Store
+commits.txt
