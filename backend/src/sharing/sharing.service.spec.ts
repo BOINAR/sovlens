@@ -5,6 +5,7 @@ import { SharingRepository } from './sharing.repository';
 import { PhotosRepository } from '../photos/photos.repository';
 import { AlbumsRepository } from '../albums/albums.repository';
 import { StorageService } from '../storage/storage.service';
+import { StorageConfigRepository } from '../storage-config/storage-config.repository';
 
 describe('SharingService', () => {
   let service: SharingService;
@@ -12,6 +13,7 @@ describe('SharingService', () => {
   let photosRepository: jest.Mocked<PhotosRepository>;
   let albumsRepository: jest.Mocked<AlbumsRepository>;
   let storageService: jest.Mocked<StorageService>;
+  let storageConfigRepository: jest.Mocked<StorageConfigRepository>;
 
   const userId = 'user-id-123';
   const photoId = 'photo-id-123';
@@ -49,6 +51,11 @@ describe('SharingService', () => {
     createdAt: new Date(),
   };
 
+  // Provider factice retourné par getProvider(), qui expose getSignedUrl()
+  const mockProvider = {
+    getSignedUrl: jest.fn().mockResolvedValue('https://signed-url.com'),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -72,7 +79,11 @@ describe('SharingService', () => {
         },
         {
           provide: StorageService,
-          useValue: { getSignedUrl: jest.fn() },
+          useValue: { getProvider: jest.fn().mockReturnValue(mockProvider) },
+        },
+        {
+          provide: StorageConfigRepository,
+          useValue: { findByUserId: jest.fn().mockResolvedValue(undefined) },
         },
       ],
     }).compile();
@@ -82,8 +93,12 @@ describe('SharingService', () => {
     photosRepository = module.get(PhotosRepository);
     albumsRepository = module.get(AlbumsRepository);
     storageService = module.get(StorageService);
+    storageConfigRepository = module.get(StorageConfigRepository);
 
     jest.clearAllMocks();
+    mockProvider.getSignedUrl.mockResolvedValue('https://signed-url.com');
+    storageConfigRepository.findByUserId.mockResolvedValue(undefined as any);
+    storageService.getProvider.mockReturnValue(mockProvider as any);
   });
 
   describe('createPhotoShareLink', () => {
@@ -144,12 +159,15 @@ describe('SharingService', () => {
     it('devrait retourner une photo partagée', async () => {
       sharingRepository.findByToken.mockResolvedValue(mockShareLink);
       photosRepository.findById.mockResolvedValue(mockPhoto);
-      storageService.getSignedUrl.mockResolvedValue('https://signed-url.com');
 
       const result = await service.getSharedResource(token);
 
       expect(result.type).toBe('photo');
       expect(result.resource).toHaveProperty('url');
+      expect(storageService.getProvider).toHaveBeenCalledWith(
+        mockPhoto.storageMode,
+        undefined,
+      );
     });
 
     it('devrait retourner un album partagé avec ses photos', async () => {
@@ -160,7 +178,6 @@ describe('SharingService', () => {
       });
       albumsRepository.findById.mockResolvedValue(mockAlbum);
       albumsRepository.findPhotosInAlbum.mockResolvedValue([mockPhoto]);
-      storageService.getSignedUrl.mockResolvedValue('https://signed-url.com');
 
       const result = await service.getSharedResource(token);
 
