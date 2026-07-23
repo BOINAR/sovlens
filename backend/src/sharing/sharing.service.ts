@@ -7,6 +7,7 @@ import { SharingRepository } from './sharing.repository';
 import { PhotosRepository } from '../photos/photos.repository';
 import { AlbumsRepository } from '../albums/albums.repository';
 import { StorageService } from '../storage/storage.service';
+import { StorageConfigRepository } from '../storage-config/storage-config.repository';
 import { CreateShareLinkInput } from './sharing.validation';
 import { randomUUID } from 'crypto';
 
@@ -17,7 +18,21 @@ export class SharingService {
     private readonly photosRepository: PhotosRepository,
     private readonly albumsRepository: AlbumsRepository,
     private readonly storageService: StorageService,
+    private readonly storageConfigRepository: StorageConfigRepository,
   ) {}
+
+  private async resolveUrl(
+    ownerId: string,
+    storageMode: string,
+    objectKey: string,
+  ) {
+    const profile = await this.storageConfigRepository.findByUserId(ownerId);
+    const provider = this.storageService.getProvider(
+      storageMode,
+      profile ?? undefined,
+    );
+    return provider.getSignedUrl(objectKey);
+  }
 
   async createPhotoShareLink(
     userId: string,
@@ -100,7 +115,11 @@ export class SharingService {
       const photo = await this.photosRepository.findById(link.photoId);
       if (!photo) throw new NotFoundException('Photo introuvable');
 
-      const url = await this.storageService.getSignedUrl(photo.objectKey);
+      const url = await this.resolveUrl(
+        link.userId,
+        photo.storageMode,
+        photo.objectKey,
+      );
       return { type: 'photo', resource: { ...photo, url } };
     }
 
@@ -114,7 +133,11 @@ export class SharingService {
       const photosWithUrls = await Promise.all(
         photos.map(async (photo) => ({
           ...photo,
-          url: await this.storageService.getSignedUrl(photo.objectKey),
+          url: await this.resolveUrl(
+            link.userId,
+            photo.storageMode,
+            photo.objectKey,
+          ),
         })),
       );
 
