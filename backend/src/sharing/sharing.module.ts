@@ -9,7 +9,13 @@ import { StorageModule } from '../storage/storage.module';
 import { StorageConfigModule } from '../storage-config/storage-config.module';
 
 @Module({
-  imports: [DbModule, PhotosModule, AlbumsModule, StorageModule, StorageConfigModule],
+  imports: [
+    DbModule,
+    PhotosModule,
+    AlbumsModule,
+    StorageModule,
+    StorageConfigModule,
+  ],
   controllers: [SharingController],
   providers: [SharingService, SharingRepository],
 })
