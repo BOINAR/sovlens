@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, SyntheticEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/auth-context';
 import { authApi } from '@/lib/api/endpoints';
@@ -16,19 +16,22 @@ const TRUST_ITEMS = [
 
 export default function LoginPage() {
   const [view, setView] = useState<View>('login');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { login, register } = useAuth();
   const router = useRouter();
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setInfo(null);
     setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = (formData.get('password') as string) ?? '';
+
     try {
       if (view === 'login') {
         await login(email, password);
@@ -116,9 +119,9 @@ export default function LoginPage() {
                 <label className="block text-xs font-semibold text-sv-text2 mb-1.5">E-mail</label>
                 <input
                   type="email"
+                  name="email"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  defaultValue=""
                   placeholder="vous@exemple.fr"
                   className="w-full h-11 bg-sv-surface2 border border-sv-border rounded-lg px-3.5 text-sm outline-none focus:border-sv-accent mb-5"
                 />
@@ -163,9 +166,9 @@ export default function LoginPage() {
                 <label className="block text-xs font-semibold text-sv-text2 mb-1.5">E-mail</label>
                 <input
                   type="email"
+                  name="email"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  defaultValue=""
                   placeholder="vous@exemple.fr"
                   className="w-full h-11 bg-sv-surface2 border border-sv-border rounded-lg px-3.5 text-sm outline-none focus:border-sv-accent mb-3.5"
                 />
@@ -184,10 +187,9 @@ export default function LoginPage() {
                 </div>
                 <input
                   type="password"
+                  name="password"
                   required
                   minLength={8}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   className="w-full h-11 bg-sv-surface2 border border-sv-border rounded-lg px-3.5 text-sm outline-none focus:border-sv-accent mb-5"
                 />
