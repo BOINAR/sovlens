@@ -118,6 +118,51 @@ Tout push sur `main` déclenche le pipeline `.github/workflows/ci-cd.yml` :
 
 Aucun secret n'est stocké dans le dépôt ni sur le serveur : ils sont définis dans les GitHub Secrets et injectés au moment du déploiement, en variables d'environnement ou en Docker secrets. L'inventaire est dans [`documentation/architecture/secrets.md`](./documentation/architecture/secrets.md).
 
+## Sauvegarde et restauration
+
+Le service Swarm `backup` fait un dump de PostgreSQL chaque jour à 1 h UTC et l'envoie dans le bucket Garage `sovlens-backups`, sous `postgres/`. Ses logs : `docker service logs sovlens_backup`.
+
+### Restaurer un dump
+
+Sur le VPS, arrêter le backend pour libérer la base :
+
+```bash
+docker service scale sovlens_backend=0
+```
+
+Ouvrir un shell dans le conteneur de sauvegarde, qui dispose des outils et des identifiants :
+
+```bash
+docker exec -it $(docker ps -q -f name=sovlens_backup) sh
+```
+
+Dans le conteneur :
+
+```sh
+export AWS_ACCESS_KEY_ID="$(cat /run/secrets/backup_s3_access_key)"
+export AWS_SECRET_ACCESS_KEY="$(cat /run/secrets/backup_s3_secret_key)"
+export AWS_DEFAULT_REGION=garage PGPASSWORD="$POSTGRES_PASSWORD"
+
+# Lister les dumps disponibles
+aws --endpoint-url "$S3_ENDPOINT" s3 ls "s3://$S3_BUCKET/postgres/"
+
+# Recréer la base vide
+psql -h postgres -U "$POSTGRES_USER" -d postgres -c "DROP DATABASE \"$POSTGRES_DB\";"
+psql -h postgres -U "$POSTGRES_USER" -d postgres -c "CREATE DATABASE \"$POSTGRES_DB\";"
+
+# Restaurer le dump choisi
+aws --endpoint-url "$S3_ENDPOINT" s3 cp "s3://$S3_BUCKET/postgres/NOM_DU_DUMP.sql.gz" - \
+  | gunzip | psql -h postgres -U "$POSTGRES_USER" "$POSTGRES_DB"
+
+exit
+```
+
+Redémarrer le backend :
+
+```bash
+docker service scale sovlens_backend=1
+```
+
 ## Documentation
 
 La documentation technique et les livrables sont dans [`documentation/`](./documentation).
