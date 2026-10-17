@@ -1,146 +1,126 @@
-# Sovlens
+# SovLens
 
-Application web de gestion de photos souveraine — alternative open source à Google Photos.
+Application web de gestion de photos souveraine, alternative open source à Google Photos.
 
-L'utilisateur peut stocker ses photos sur le cloud ou sur son propre serveur auto-hébergé, depuis une interface web ou mobile, sans dépendre d'un GAFAM.
+L'utilisateur choisit où sont stockées ses photos : sur le stockage cloud SovLens, ou sur son propre serveur S3 auto-hébergé. La bascule se fait à tout moment depuis l'interface, sans changer l'expérience d'utilisation.
+
+Production : https://sovlens.stellodev.com
 
 ## Stack technique
 
 | Couche | Technologie |
 |---|---|
-| Frontend | Next.js 16 |
+| Frontend | Next.js 16, React 19, Tailwind CSS |
 | Backend | NestJS 11 + Fastify |
-| ORM | Drizzle ORM v1 RC |
-| Validation | Drizzle Zod |
+| ORM | Drizzle ORM |
+| Validation | Zod 4 |
 | Base de données | PostgreSQL 18 |
-| Stockage objet | Garage (S3 compatible) |
+| Stockage objet | Garage (compatible S3) |
 | Reverse proxy | Caddy |
 | Orchestration | Docker Swarm |
-| CI/CD | GitHub Actions |
-| Monitoring | Prometheus + Grafana |
+| CI/CD | GitHub Actions, GHCR, SonarCloud |
+| Monitoring | Prometheus, Grafana, cAdvisor, node-exporter |
 
 ## Fonctionnalités
 
-- Inscription / Connexion sécurisée (JWT)
-- Upload de photos (drag & drop, max 10MB)
-- Galerie avec vues détaillées
-- Gestion d'albums
-- Partage via lien public
-- **Killer Feature** : switch stockage cloud ↔ stockage souverain depuis les paramètres
-
-## Prérequis
-
-- Docker installé
-- Docker Swarm initialisé
-- Node.js 22+
-- Un compte GitHub
-
-## Installation locale
-
-```bash
-# Cloner le repo
-git clone git@github.com:BOINAR/sovlens.git
-cd sovlens
-
-# Copier les variables d'environnement
-cp .env.example .env
-
-# Lancer l'application en développement local
-docker compose up -d
-```
-
-L'application est accessible sur :
-
-- Frontend : http://localhost:3000
-- Backend API : http://localhost:4000
-- Documentation API : http://localhost:4000/api/docs
-- Grafana : http://localhost:3001
-
-## Variables d'environnement
-
-Copier `.env.example` en `.env` et remplir les valeurs :
-
-```env
-# Base de données
-DATABASE_URL=postgresql://user:password@db:5432/sovlens
-
-# JWT
-JWT_SECRET=your_secret_here
-JWT_EXPIRES_IN=7d
-
-# Stockage cloud
-S3_CLOUD_ENDPOINT=http://garage:3900
-S3_CLOUD_ACCESS_KEY=your_access_key
-S3_CLOUD_SECRET_KEY=your_secret_key
-S3_CLOUD_BUCKET=photos
-
-# Stockage souverain auto-hébergé
-S3_SOVEREIGN_ENDPOINT=http://your-homelab-endpoint:3900
-S3_SOVEREIGN_ACCESS_KEY=your_access_key
-S3_SOVEREIGN_SECRET_KEY=your_secret_key
-S3_SOVEREIGN_BUCKET=photos
-```
+- Inscription, connexion (JWT + refresh token en cookie httpOnly) et réinitialisation du mot de passe par e-mail
+- Upload de photos (JPEG, PNG, WebP, GIF, 10 Mo maximum)
+- Galerie filtrée selon le mode de stockage actif
+- Albums
+- Partage par lien public avec expiration
+- **Killer feature** : bascule cloud ↔ souverain, implémentée avec le pattern Strategy (`IStorageProvider` → `CloudStorageProvider` / `SovereignStorageProvider`)
 
 ## Structure du projet
 
 ```text
 sovlens/
-├── frontend/              # Next.js 16
-├── backend/               # NestJS 11 + Fastify
-├── infra/                 # Infrastructure Docker Swarm, Caddy, monitoring
-├── documentation/         # Documentation technique et livrables
-│   └── architecture/
-│       ├── C4-Diagram-containers.md
-│       ├── README.md
-│       ├── class-diagram.md
-│       ├── green-it.md
-│       ├── sequence-killer-feature.md
-│       ├── sequence-sharing.md
-│       ├── technical-choices.md
-│       └── use-case-diagram.md
-├── docker-compose.yml     # Développement local
-├── docker-stack.yml       # Déploiement Docker Swarm
-├── Caddyfile              # Reverse proxy HTTPS
-├── .github/workflows/     # Pipelines GitHub Actions
-└── .env.example
+├── backend/                 # API NestJS + Fastify
+├── frontend/                # Application Next.js
+├── infra/                   # Stack Docker Swarm, Caddyfile, template Garage, script de sauvegarde
+├── monitoring/              # Stack Prometheus + Grafana
+├── documentation/           # Analyse, architecture, base de données, API, gestion de projet
+└── .github/workflows/       # Pipeline CI/CD
 ```
 
-## Lancer les tests
+## Développement local
+
+Le dépôt n'a pas de `package.json` racine : chaque application se lance depuis son dossier.
+
+### Prérequis
+
+- Node.js 22 et pnpm
+- Une base PostgreSQL, un Garage S3 et un serveur SMTP de test (Mailpit)
+
+### Backend
 
 ```bash
-# Tests unitaires
-docker compose exec backend npm run test
+cd backend
+pnpm install
+pnpm start:dev        # http://localhost:3001
+```
 
-# Tests avec couverture
-docker compose exec backend npm run test:cov
+Variables attendues dans `backend/.env` (fichier non versionné) :
 
-# Tests E2E
-docker compose exec backend npm run test:e2e
+```env
+DATABASE_URL=postgresql://user:password@host:5432/sovlens
+PORT=3001
+NODE_ENV=development
+FRONTEND_URL=http://localhost:3000
+JWT_SECRET=
+
+MAIL_HOST=
+MAIL_PORT=1025
+MAIL_FROM=noreply@sovlens.local
+
+S3_CLOUD_ENDPOINT=
+S3_CLOUD_REGION=garage
+S3_CLOUD_ACCESS_KEY=
+S3_CLOUD_SECRET_KEY=
+S3_CLOUD_BUCKET=
+```
+
+Le stockage souverain n'a pas de variable d'environnement : l'endpoint, le bucket et les clés de chaque utilisateur sont saisis dans **Paramètres** et enregistrés dans la table `storage_profiles`.
+
+Migrations de base de données :
+
+```bash
+pnpm exec drizzle-kit migrate
+```
+
+### Frontend
+
+```bash
+cd frontend
+pnpm install
+pnpm dev              # http://localhost:3000
+```
+
+L'URL de l'API se règle avec `NEXT_PUBLIC_API_URL` (par défaut `http://localhost:3001`).
+
+## Tests
+
+```bash
+cd backend
+pnpm test             # tests unitaires
+pnpm test:cov         # avec couverture
+pnpm test:e2e         # tests E2E
 ```
 
 ## Déploiement
 
-Le déploiement cible repose sur Docker Swarm.
+Tout push sur `main` déclenche le pipeline `.github/workflows/ci-cd.yml` :
 
-Tout push sur `main` déclenche le pipeline GitHub Actions :
+1. Lint et tests du backend, analyse SonarCloud
+2. Lint et build du frontend
+3. Build des images Docker et push sur GHCR
+4. Déploiement de la stack applicative sur le VPS (Docker Swarm)
+5. Déploiement de la stack de monitoring
 
-1. Lint
-2. Tests unitaires
-3. Scan qualité
-4. Build des images Docker
-5. Push vers le registry
-6. Déploiement sur le VPS via SSH
-7. Mise à jour de la stack Docker Swarm
-
-Exemple de déploiement manuel :
-
-```bash
-docker stack deploy -c docker-stack.yml sovlens
-```
+Aucun secret n'est stocké dans le dépôt ni sur le serveur : ils sont définis dans les GitHub Secrets et injectés au moment du déploiement, en variables d'environnement ou en Docker secrets. L'inventaire est dans [`documentation/architecture/secrets.md`](./documentation/architecture/secrets.md).
 
 ## Documentation
 
-La documentation complète est dans le dossier [`/documentation`](./documentation).
+La documentation technique et les livrables sont dans [`documentation/`](./documentation).
 
 ## Licence
 
