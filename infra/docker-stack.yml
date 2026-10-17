@@ -91,6 +91,38 @@ services:
         constraints:
           - node.role == manager
 
+  backup:
+    image: postgres:18-alpine
+    entrypoint: ["/bin/sh", "/usr/local/bin/backup.sh"]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      S3_ENDPOINT: http://garage:3900
+      S3_BUCKET: sovlens-backups
+      BACKUP_HOUR_UTC: "1"
+    configs:
+      - source: backup_script
+        target: /usr/local/bin/backup.sh
+        mode: 0555
+    secrets:
+      - source: backup_s3_access_key
+        target: backup_s3_access_key
+        mode: 0400
+      - source: backup_s3_secret_key
+        target: backup_s3_secret_key
+        mode: 0400
+    networks:
+      - sovlens-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+      resources:
+        limits:
+          memory: 256M
+
   caddy:
     image: caddy:2-alpine
     ports:
@@ -130,3 +162,14 @@ secrets:
   garage_admin_token:
     external: true
     name: garage_admin_token_${SECRET_VERSION}
+  backup_s3_access_key:
+    external: true
+    name: backup_s3_access_key_${SECRET_VERSION}
+  backup_s3_secret_key:
+    external: true
+    name: backup_s3_secret_key_${SECRET_VERSION}
+
+configs:
+  backup_script:
+    file: ./scripts/backup.sh
+    name: backup_script_${SECRET_VERSION}

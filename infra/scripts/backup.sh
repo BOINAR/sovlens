@@ -1,33 +1,35 @@
-#!/bin/bash
-set -euo pipefail
+#!/bin/sh
+# Sauvegarde quotidienne de PostgreSQL vers Garage (bucket sovlens-backups).
+# Exécuté par le service Swarm « backup » : les identifiants S3 sont lus depuis
+# les Docker secrets, le mot de passe Postgres est injecté par le pipeline.
+set -eu
 
-DATE=$(date +%Y-%m-%d_%H-%M-%S)
-BACKUP_DIR=/home/nayeff/backups/postgres
-CREDS_FILE=/home/nayeff/backups/.s3-backup-credentials
-BUCKET=sovlens-backups
-ENDPOINT=http://garage:3900
-NETWORK=sovlens_sovlens-net
+apk add --no-cache aws-cli >/dev/null
 
-mkdir -p "$BACKUP_DIR"
+export AWS_ACCESS_KEY_ID="$(cat /run/secrets/backup_s3_access_key)"
+export AWS_SECRET_ACCESS_KEY="$(cat /run/secrets/backup_s3_secret_key)"
+export AWS_DEFAULT_REGION=garage
+export PGPASSWORD="$POSTGRES_PASSWORD"
 
-PG_CONTAINER=$(docker ps -q -f name=sovlens_postgres)
-DUMP_FILE="$BACKUP_DIR/sovlens_${DATE}.sql.gz"
+BACKUP_HOUR_UTC="${BACKUP_HOUR_UTC:-1}"
 
-# 1. Dump PostgreSQL
-docker exec "$PG_CONTAINER" pg_dump -U sovlens sovlens_db | gzip > "$DUMP_FILE"
+run_backup() {
+  set -o pipefail
+  key="postgres/sovlens_$(date -u +%Y-%m-%d_%H-%M-%S).sql.gz"
+  pg_dump -h postgres -U "$POSTGRES_USER" "$POSTGRES_DB" \
+    | gzip \
+    | aws --endpoint-url "$S3_ENDPOINT" s3 cp - "s3://${S3_BUCKET}/${key}"
+  echo "$(date -u) Sauvegarde terminée : s3://${S3_BUCKET}/${key}"
+}
 
-# 2. Rotation locale : conserver 7 jours
-find "$BACKUP_DIR" -name "*.sql.gz" -mtime +7 -delete
+echo "$(date -u) Service de sauvegarde démarré (tous les jours à ${BACKUP_HOUR_UTC}h UTC)"
 
-# 3. Upload vers Garage (bucket dédié sovlens-backups)
-ACCESS_KEY=$(sed -n '1p' "$CREDS_FILE")
-SECRET_KEY=$(sed -n '2p' "$CREDS_FILE")
-
-docker run --rm --network "$NETWORK" \
-  -e AWS_ACCESS_KEY_ID="$ACCESS_KEY" \
-  -e AWS_SECRET_ACCESS_KEY="$SECRET_KEY" \
-  -e AWS_DEFAULT_REGION=garage \
-  -v "$BACKUP_DIR":/backup:ro \
-  amazon/aws-cli --endpoint-url "$ENDPOINT" s3 cp "/backup/sovlens_${DATE}.sql.gz" "s3://$BUCKET/postgres/sovlens_${DATE}.sql.gz"
-
-echo "Backup terminé : $DUMP_FILE (local + Garage)"
+while true; do
+  now=$(date -u +%s)
+  wait=$(( (BACKUP_HOUR_UTC * 3600 - now % 86400 + 86400) % 86400 ))
+  [ "$wait" -eq 0 ] && wait=86400
+  sleep "$wait"
+  if ! run_backup; then
+    echo "$(date -u) ERREUR : la sauvegarde a échoué" >&2
+  fi
+done

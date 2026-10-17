@@ -142,7 +142,7 @@ jobs:
           host: ${{ secrets.STAGING_HOST }}
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
-          source: "infra/docker-stack.yml,infra/Caddyfile,infra/garage.toml.template"
+          source: "infra/docker-stack.yml,infra/Caddyfile,infra/garage.toml.template,infra/scripts/backup.sh"
           target: "~/sovlens-deploy"
 
       - name: Deploy stack via SSH
@@ -172,6 +172,8 @@ jobs:
             }
             create_secret garage_rpc_secret '${{ secrets.GARAGE_RPC_SECRET }}'
             create_secret garage_admin_token '${{ secrets.GARAGE_ADMIN_TOKEN }}'
+            create_secret backup_s3_access_key '${{ secrets.BACKUP_S3_ACCESS_KEY }}'
+            create_secret backup_s3_secret_key '${{ secrets.BACKUP_S3_SECRET_KEY }}'
 
             # garage.toml ne contient plus aucun secret : simple copie du template
             cp garage.toml.template garage.toml
@@ -182,9 +184,13 @@ jobs:
 
             # Nettoyage des anciennes versions de secrets (celles encore utilisées sont ignorées)
             docker secret ls --format '{{.Name}}' \
-              | grep -E '^garage_(rpc_secret|admin_token)_' \
+              | grep -E '^(garage_rpc_secret|garage_admin_token|backup_s3_access_key|backup_s3_secret_key)_' \
               | grep -v "_${SECRET_VERSION}$" \
               | xargs -r docker secret rm >/dev/null 2>&1 || true
+            docker config ls --format '{{.Name}}' \
+              | grep -E '^backup_script_' \
+              | grep -v "_${SECRET_VERSION}$" \
+              | xargs -r docker config rm >/dev/null 2>&1 || true
 
   deploy-monitoring:
     name: Deploy monitoring (Swarm)
