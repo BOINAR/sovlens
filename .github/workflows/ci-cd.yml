@@ -152,8 +152,10 @@ jobs:
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
           script: |
+            set -e
             cd ~/sovlens-deploy/infra
             export IMAGE_TAG=${{ github.sha }}
+            export SECRET_VERSION=$(echo "${{ github.sha }}" | cut -c1-12)
             export POSTGRES_USER=${{ secrets.STAGING_POSTGRES_USER }}
             export POSTGRES_PASSWORD=${{ secrets.STAGING_POSTGRES_PASSWORD }}
             export POSTGRES_DB=${{ secrets.STAGING_POSTGRES_DB }}
@@ -161,10 +163,67 @@ jobs:
             export S3_CLOUD_ACCESS_KEY=${{ secrets.STAGING_S3_ACCESS_KEY }}
             export S3_CLOUD_SECRET_KEY=${{ secrets.STAGING_S3_SECRET_KEY }}
             export S3_CLOUD_BUCKET=${{ secrets.STAGING_S3_BUCKET }}
-            export GARAGE_RPC_SECRET=${{ secrets.GARAGE_RPC_SECRET }}
-            export GARAGE_ADMIN_TOKEN=${{ secrets.GARAGE_ADMIN_TOKEN }}
-            envsubst '${IMAGE_TAG} ${POSTGRES_USER} ${POSTGRES_PASSWORD} ${POSTGRES_DB} ${JWT_SECRET} ${S3_CLOUD_ACCESS_KEY} ${S3_CLOUD_SECRET_KEY} ${S3_CLOUD_BUCKET} ${GARAGE_RPC_SECRET} ${GARAGE_ADMIN_TOKEN}' < garage.toml.template > garage.toml
-            envsubst '${IMAGE_TAG} ${POSTGRES_USER} ${POSTGRES_PASSWORD} ${POSTGRES_DB} ${JWT_SECRET} ${S3_CLOUD_ACCESS_KEY} ${S3_CLOUD_SECRET_KEY} ${S3_CLOUD_BUCKET} ${GARAGE_RPC_SECRET} ${GARAGE_ADMIN_TOKEN}' < docker-stack.yml > docker-stack-resolved.yml
+
+            # Docker secrets Swarm créés depuis les GitHub Secrets (chiffrés dans le Raft,
+            # montés en mémoire dans /run/secrets, jamais écrits sur le disque du VPS)
+            create_secret() {
+              docker secret inspect "$1_${SECRET_VERSION}" >/dev/null 2>&1 \
+                || printf '%s' "$2" | docker secret create "$1_${SECRET_VERSION}" - >/dev/null
+            }
+            create_secret garage_rpc_secret '${{ secrets.GARAGE_RPC_SECRET }}'
+            create_secret garage_admin_token '${{ secrets.GARAGE_ADMIN_TOKEN }}'
+
+            # garage.toml ne contient plus aucun secret : simple copie du template
+            cp garage.toml.template garage.toml
+            envsubst '${IMAGE_TAG} ${SECRET_VERSION} ${POSTGRES_USER} ${POSTGRES_PASSWORD} ${POSTGRES_DB} ${JWT_SECRET} ${S3_CLOUD_ACCESS_KEY} ${S3_CLOUD_SECRET_KEY} ${S3_CLOUD_BUCKET}' < docker-stack.yml > docker-stack-resolved.yml
             docker stack deploy -c docker-stack-resolved.yml sovlens --with-registry-auth
-            docker service update --force sovlens_caddy
             rm docker-stack-resolved.yml
+            docker service update --force sovlens_caddy
+
+            # Nettoyage des anciennes versions de secrets (celles encore utilisées sont ignorées)
+            docker secret ls --format '{{.Name}}' \
+              | grep -E '^garage_(rpc_secret|admin_token)_' \
+              | grep -v "_${SECRET_VERSION}$" \
+              | xargs -r docker secret rm >/dev/null 2>&1 || true
+
+  deploy-monitoring:
+    name: Deploy monitoring (Swarm)
+    needs: deploy-prod
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copie des fichiers de monitoring sur le VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          source: "monitoring/docker-stack.monitoring.yml,monitoring/prometheus/prometheus.yml,monitoring/grafana"
+          target: "~/sovlens-deploy"
+      - name: Deploy monitoring stack via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -e
+            cd ~/sovlens-deploy/monitoring
+            export SECRET_VERSION=$(echo "${{ github.sha }}" | cut -c1-12)
+
+            create_secret() {
+              docker secret inspect "$1_${SECRET_VERSION}" >/dev/null 2>&1 \
+                || printf '%s' "$2" | docker secret create "$1_${SECRET_VERSION}" - >/dev/null
+            }
+            create_secret grafana_admin_password '${{ secrets.GRAFANA_ADMIN_PASSWORD }}'
+            create_secret garage_homelab_metrics_token '${{ secrets.GARAGE_HOMELAB_METRICS_TOKEN }}'
+
+            envsubst '${SECRET_VERSION}' < docker-stack.monitoring.yml > docker-stack-monitoring-resolved.yml
+            docker stack deploy -c docker-stack-monitoring-resolved.yml monitoring
+            rm docker-stack-monitoring-resolved.yml
+
+            docker secret ls --format '{{.Name}}' \
+              | grep -E '^(grafana_admin_password|garage_homelab_metrics_token)_' \
+              | grep -v "_${SECRET_VERSION}$" \
+              | xargs -r docker secret rm >/dev/null 2>&1 || true

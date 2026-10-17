@@ -74,6 +74,13 @@ services:
       - ./garage.toml:/etc/garage.toml
       - garage-meta:/var/lib/garage/meta
       - garage-data:/var/lib/garage/data
+    secrets:
+      - source: garage_rpc_secret
+        target: garage_rpc_secret
+        mode: 0400
+      - source: garage_admin_token
+        target: garage_admin_token
+        mode: 0400
     networks:
       - sovlens-net
     deploy:
@@ -113,3 +120,13 @@ volumes:
   garage-data:
   caddy-data:
   caddy-config:
+
+# Secrets créés par le pipeline depuis les GitHub Secrets, versionnés par commit
+# (un secret Swarm est immuable). Aucun secret n'est écrit sur le disque du VPS.
+secrets:
+  garage_rpc_secret:
+    external: true
+    name: garage_rpc_secret_${SECRET_VERSION}
+  garage_admin_token:
+    external: true
+    name: garage_admin_token_${SECRET_VERSION}
