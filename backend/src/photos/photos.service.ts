@@ -87,8 +87,12 @@ export class PhotosService {
   }
 
   async findAll(userId: string) {
-    const photos = await this.photosRepository.findAllByUserId(userId);
     const profile = await this.storageConfigRepository.findByUserId(userId);
+    const activeMode = profile?.mode === 'sovereign' ? 'sovereign' : 'cloud';
+    const photos = await this.photosRepository.findAllByUserId(
+      userId,
+      activeMode,
+    );
 
     const photosWithUrls = await Promise.all(
       photos.map(async (photo) => {

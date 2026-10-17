@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq, desc } from 'drizzle-orm';
+import { and, eq, desc } from 'drizzle-orm';
 import { DRIZZLE, DbClient } from 'src/db/drizzle.provider';
 import { photosTable } from './photos.schema';
 
@@ -20,11 +20,18 @@ export class PhotosRepository {
     return photo;
   }
 
-  async findAllByUserId(userId: string) {
+  async findAllByUserId(userId: string, storageMode?: 'cloud' | 'sovereign') {
+    const condition = storageMode
+      ? and(
+          eq(photosTable.userId, userId),
+          eq(photosTable.storageMode, storageMode),
+        )
+      : eq(photosTable.userId, userId);
+
     return this.db
       .select()
       .from(photosTable)
-      .where(eq(photosTable.userId, userId))
+      .where(condition)
       .orderBy(desc(photosTable.createdAt));
   }
 

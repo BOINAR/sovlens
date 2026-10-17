@@ -74,6 +74,15 @@ describe('PhotosRepository', () => {
       expect(mockDb.orderBy).toHaveBeenCalled();
       expect(result).toEqual([mockPhoto]);
     });
+
+    it('devrait filtrer par mode de stockage quand il est fourni', async () => {
+      mockDb.orderBy.mockResolvedValue([mockPhoto]);
+
+      const result = await repository.findAllByUserId(userId, 'cloud');
+
+      expect(mockDb.where).toHaveBeenCalled();
+      expect(result).toEqual([mockPhoto]);
+    });
   });
 
   describe('findById', () => {

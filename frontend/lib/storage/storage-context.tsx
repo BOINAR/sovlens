@@ -33,17 +33,12 @@ export function StorageProvider({ children }: { children: ReactNode }) {
     refresh();
   }, [refresh]);
 
+  // Pas de mise à jour optimiste : le mode ne change qu'après confirmation
+  // du backend, pour que la galerie recharge une fois la base à jour.
   const setCloudMode = useCallback(async () => {
-    const previous = config;
-    setConfig((c) => (c ? { ...c, mode: 'cloud' } : c));
-    try {
-      const updated = await storageApi.updateConfig({ mode: 'cloud' });
-      setConfig(updated);
-    } catch (err) {
-      setConfig(previous);
-      throw err;
-    }
-  }, [config]);
+    const updated = await storageApi.updateConfig({ mode: 'cloud' });
+    setConfig(updated);
+  }, []);
 
   const setSovereignConfig = useCallback(async (data: Omit<UpdateStorageConfigRequest, 'mode'>) => {
     const updated = await storageApi.updateConfig({ mode: 'sovereign', ...data });

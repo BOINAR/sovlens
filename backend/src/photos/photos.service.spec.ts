@@ -151,6 +151,32 @@ describe('PhotosService', () => {
       expect(result).toHaveLength(1);
       expect(result[0]).toHaveProperty('url', 'https://signed-url.com');
     });
+
+    it('devrait filtrer sur le mode cloud quand aucun profil souverain', async () => {
+      storageConfigRepository.findByUserId.mockResolvedValue(undefined as any);
+      photosRepository.findAllByUserId.mockResolvedValue([]);
+
+      await service.findAll(userId);
+
+      expect(photosRepository.findAllByUserId).toHaveBeenCalledWith(
+        userId,
+        'cloud',
+      );
+    });
+
+    it('devrait filtrer sur le mode souverain quand le profil est souverain', async () => {
+      storageConfigRepository.findByUserId.mockResolvedValue({
+        mode: 'sovereign',
+      } as any);
+      photosRepository.findAllByUserId.mockResolvedValue([]);
+
+      await service.findAll(userId);
+
+      expect(photosRepository.findAllByUserId).toHaveBeenCalledWith(
+        userId,
+        'sovereign',
+      );
+    });
   });
 
   describe('findOne', () => {

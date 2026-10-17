@@ -3,6 +3,7 @@
 import {useEffect, useState, useCallback} from "react";
 import {photosApi, sharingApi} from "@/lib/api/endpoints";
 import {Photo, ApiError} from "@/lib/api/types";
+import {useStorageMode} from "@/lib/storage/storage-context";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString("fr-FR", {
@@ -24,6 +25,8 @@ export default function GalleryPage() {
   const [error, setError] = useState<string | null>(null);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [shareLink, setShareLink] = useState<string | null>(null);
+  const {config} = useStorageMode();
+  const activeMode = config?.mode;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -41,10 +44,14 @@ export default function GalleryPage() {
     }
   }, []);
 
+  // Recharge la galerie à chaque bascule cloud ↔ souverain : le backend
+  // ne renvoie que les photos du mode actif.
   useEffect(() => {
+    if (!activeMode) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOpenIndex(null);
     load();
-  }, [load]);
+  }, [load, activeMode]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
