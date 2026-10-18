@@ -163,6 +163,72 @@ Redémarrer le backend :
 docker service scale sovlens_backend=1
 ```
 
+## Mise en pause et redémarrage
+
+L'application peut être arrêtée sans perte de données, puis remise en service à l'identique : toute l'infrastructure de production est décrite dans le dépôt et redéployée par le pipeline.
+
+### Mettre en pause
+
+1. **Désactiver le pipeline**, pour qu'un push sur `main` ne redéploie pas tout : *Actions → CI/CD SovLens → ⋯ → Disable workflow*.
+2. **Arrêter les stacks** sur le VPS (`docker stop` ne suffit pas : Swarm relancerait les conteneurs) :
+
+   ```bash
+   docker stack rm monitoring
+   docker stack rm sovlens
+   ```
+
+3. **Vérifier** : `docker service ls` doit être vide, et `docker volume ls` doit toujours lister les volumes `sovlens_*` (Postgres, Garage, certificats Caddy) et celui de Grafana.
+
+Ce que `docker stack rm` conserve et supprime :
+
+| Élément | Après l'arrêt | Au redémarrage |
+|---|---|---|
+| Volumes (base, photos, Grafana, certificats) | Conservés | Réutilisés tels quels |
+| GitHub Secrets | Intacts | Réinjectés par le pipeline |
+| Docker secrets Swarm (`external`) | Conservés | Recréés depuis GitHub |
+| Config `backup_script` et réseau `sovlens_sovlens-net` | Supprimés | Recréés par le pipeline |
+| Images Docker | Conservées dans GHCR | Retéléchargées |
+
+Pendant la pause, le service `backup` est arrêté : plus aucun dump quotidien n'est produit.
+
+### Redémarrer
+
+1. **Vérifier les GitHub Secrets** listés dans [`secrets.md`](./documentation/architecture/secrets.md). `STAGING_STORAGE_ENCRYPTION_KEY` doit être **exactement** la même qu'avant la pause : sans elle, les identifiants S3 souverains chiffrés en base sont illisibles et les utilisateurs doivent les ressaisir.
+2. **Réactiver le pipeline** : *Actions → CI/CD SovLens → Enable workflow*.
+3. **Relancer le déploiement** : *Re-run all jobs* sur le dernier run de `main`, ou un nouveau push sur `main`.
+4. **Contrôler** :
+
+   ```bash
+   curl -s https://sovlens-api.stellodev.com/health                                     # {"status":"ok"}
+   curl -s -o /dev/null -w '%{http_code}\n' https://sovlens-api.stellodev.com/metrics  # 404
+   docker service ls                                                                    # toutes les répliques à 1/1
+   ```
+
+Le mode cloud est alors pleinement fonctionnel. Le mot de passe admin de Grafana est conservé dans son volume.
+
+### Mode souverain : prérequis hors pipeline
+
+Le mode souverain s'appuie sur le Garage du homelab (`192.168.1.20:3900`), joint depuis le VPS par Tailscale. Ces éléments ne sont pas déployés par le pipeline :
+
+1. **Conteneurs du homelab** (`ubuntu-server`) :
+
+   ```bash
+   docker start sovlens-garage sovlens-postgres mailpit
+   docker update --restart=unless-stopped sovlens-garage sovlens-postgres mailpit
+   ```
+
+2. **Tailscale sur le VPS**, avec acceptation des routes de sous-réseau :
+
+   ```bash
+   sudo tailscale up --accept-routes
+   ```
+
+   Puis, dans la console Tailscale : approuver la route `192.168.1.20/32` du routeur de sous-réseau `pve`, désactiver l'expiration de clé du VPS et restreindre l'ACL du VPS aux ports `3900` (S3) et `3903` (métriques) du homelab.
+
+3. **Contrôler depuis le VPS** : `curl -s -o /dev/null -w '%{http_code}\n' http://192.168.1.20:3903/metrics` doit renvoyer `401`, `403` ou `200`, et non `000`.
+
+L'adresse `192.168.1.20` est autorisée comme endpoint souverain par `SOVEREIGN_ENDPOINT_ALLOWED_HOSTS` dans `infra/docker-stack.yml` (protection SSRF). Toute autre adresse privée est refusée.
+
 ## Documentation
 
 La documentation technique et les livrables sont dans [`documentation/`](./documentation).
