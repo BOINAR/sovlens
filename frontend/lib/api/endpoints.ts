@@ -1,11 +1,9 @@
 import { apiClient, setAccessToken } from './client';
-import { Album, AuthResponse, Photo, ShareLink, ShareLinkSummary, SharedResource, StorageConfig, UpdateStorageConfigRequest, User } from './types';
+import { Album, AuthResponse, MessageResponse, Photo, ShareLink, ShareLinkSummary, SharedResource, StorageConfig, UpdateStorageConfigRequest, User } from './types';
 
 export const authApi = {
-  async register(email: string, password: string) {
-    const res = await apiClient.post<AuthResponse>('/auth/register', { email, password }, { skipAuthRetry: true });
-    setAccessToken(res.accessToken);
-    return res;
+  register(email: string, password: string) {
+    return apiClient.post<MessageResponse>('/auth/register', { email, password }, { skipAuthRetry: true });
   },
   async login(email: string, password: string) {
     const res = await apiClient.post<AuthResponse>('/auth/login', { email, password }, { skipAuthRetry: true });

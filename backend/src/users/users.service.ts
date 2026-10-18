@@ -17,7 +17,17 @@ export class UsersService {
       throw new ConflictException('Un utilisateur existe déjà avec cet email');
     }
 
-    return this.usersRepository.create(data);
+    try {
+      return await this.usersRepository.create(data);
+    } catch (error) {
+      // Deux inscriptions simultanées : la contrainte unique tranche
+      if (isUniqueViolation(error)) {
+        throw new ConflictException(
+          'Un utilisateur existe déjà avec cet email',
+        );
+      }
+      throw error;
+    }
   }
 
   async findById(id: string) {
@@ -54,4 +64,10 @@ export class UsersService {
 
     return user;
   }
+}
+
+// Code Postgres 23505 = unique_violation (Drizzle encapsule l'erreur pg dans `cause`)
+function isUniqueViolation(error: unknown): boolean {
+  const err = error as { code?: string; cause?: { code?: string } };
+  return err?.code === '23505' || err?.cause?.code === '23505';
 }

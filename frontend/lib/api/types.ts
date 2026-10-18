@@ -8,10 +8,13 @@ export interface User {
   createdAt: string;
 }
 
+// Réponse de /auth/login et /auth/refresh — le refresh token est en cookie httpOnly
 export interface AuthResponse {
   accessToken: string;
-  refreshToken: string; // présent dans le body mais on s'appuie sur le cookie httpOnly, pas sur ce champ
-  user: User;
+}
+
+export interface MessageResponse {
+  message: string;
 }
 
 export interface Photo {

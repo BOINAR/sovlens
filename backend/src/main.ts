@@ -7,12 +7,15 @@ import fastifyCookie from '@fastify/cookie';
 import fastifyMultipart from '@fastify/multipart';
 import fastifyCors from '@fastify/cors';
 import { AppModule } from './app.module';
+import { ZodExceptionFilter } from './common/zod-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
   );
+
+  app.useGlobalFilters(new ZodExceptionFilter());
 
   await app.register(fastifyCookie);
 

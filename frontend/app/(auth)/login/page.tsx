@@ -41,7 +41,7 @@ export default function LoginPage() {
         router.push('/gallery');
       } else {
         await authApi.forgotPassword(email);
-        setInfo('Le lien expire après 30 minutes.');
+        setInfo('Le lien expire après 1 heure.');
       }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Impossible de contacter l'API.");
@@ -135,7 +135,7 @@ export default function LoginPage() {
                   {loading ? '...' : 'Envoyer le lien de réinitialisation'}
                 </button>
                 <p className="text-center font-mono text-[11.5px] text-sv-text3 mt-4">
-                  Le lien expire après 30 minutes.
+                  Le lien expire après 1 heure.
                 </p>
               </form>
             </>

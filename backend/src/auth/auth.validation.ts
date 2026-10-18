@@ -1,8 +1,15 @@
 import { z } from 'zod/v4';
 
+// Email normalisé (trim + minuscules) avant validation du format
+const emailField = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(z.email('Adresse e-mail invalide'));
+
 // Inscription — l'utilisateur envoie un mot de passe en clair
 export const registerSchema = z.object({
-  email: z.email(),
+  email: emailField,
   password: z
     .string()
     .min(8, 'Le mot de passe doit contenir au moins 8 caractères'),
@@ -10,13 +17,13 @@ export const registerSchema = z.object({
 
 // Connexion
 export const loginSchema = z.object({
-  email: z.email(),
+  email: emailField,
   password: z.string().min(1),
 });
 
 // Mot de passe oublié
 export const forgotPasswordSchema = z.object({
-  email: z.email(),
+  email: emailField,
 });
 
 // Réinitialisation du mot de passe

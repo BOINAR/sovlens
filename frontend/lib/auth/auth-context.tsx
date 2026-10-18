@@ -70,16 +70,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [status]);
 
   const login = useCallback(async (email: string, password: string) => {
-    const res = await authApi.login(email, password);
-    setUser(res.user);
+    await authApi.login(email, password);
+    const me = await usersApi.me();
+    setUser(me);
     setStatus('authenticated');
   }, []);
 
-  const register = useCallback(async (email: string, password: string) => {
-    const res = await authApi.register(email, password);
-    setUser(res.user);
-    setStatus('authenticated');
-  }, []);
+  // L'API d'inscription crée seulement le compte : on enchaîne sur la connexion
+  const register = useCallback(
+    async (email: string, password: string) => {
+      await authApi.register(email, password);
+      await login(email, password);
+    },
+    [login],
+  );
 
   const logout = useCallback(async () => {
     await authApi.logout();

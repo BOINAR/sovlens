@@ -71,12 +71,17 @@ function SidebarContent({onNavigate}: {onNavigate?: () => void}) {
 
   return (
     <div className="flex flex-col h-full p-3.5">
-      <div className="flex items-center gap-2.5 px-2 pt-1.5 pb-5">
+      <Link
+        href="/gallery"
+        onClick={onNavigate}
+        aria-label="SovLens — retour à la galerie"
+        className="flex items-center gap-2.5 px-2 pt-1.5 pb-5"
+      >
         <div className="w-7.5 h-7.5 rounded-full border-[2.5px] border-sv-accent flex items-center justify-center shadow-[0_0_16px_var(--sv-ring)]">
           <div className="w-2.25 h-2.25 rounded-full bg-sv-accent" />
         </div>
         <span className="font-display font-semibold text-[17px]">SovLens</span>
-      </div>
+      </Link>
 
       <nav className="flex flex-col gap-0.75">
         {NAV_ITEMS.map(item => (
