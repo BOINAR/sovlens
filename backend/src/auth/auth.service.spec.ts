@@ -215,17 +215,20 @@ describe('AuthService', () => {
       expect(authRepository.createRefreshToken).not.toHaveBeenCalled();
     });
 
-    it('ne devrait pas révoquer les sessions pour un rafraîchissement simultané', async () => {
+    it('devrait accepter un rafraîchissement simultané dans la marge', async () => {
       authRepository.findRefreshTokenByHash.mockResolvedValue({
         ...storedToken,
         revokedAt: new Date(),
       });
       authRepository.revokeRefreshToken.mockResolvedValue(false);
+      usersService.findById.mockResolvedValue(mockUser);
+      authRepository.createRefreshToken.mockResolvedValue({} as any);
 
-      await expect(service.refresh('raw-refresh-token')).rejects.toThrow(
-        UnauthorizedException,
-      );
+      const result = await service.refresh('raw-refresh-token');
+
       expect(authRepository.deleteAllRefreshTokens).not.toHaveBeenCalled();
+      expect(authRepository.createRefreshToken).toHaveBeenCalled();
+      expect(result).toHaveProperty('accessToken');
     });
   });
 

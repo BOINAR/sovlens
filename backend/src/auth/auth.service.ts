@@ -96,16 +96,18 @@ export class AuthService {
       throw sessionExpired;
     }
 
-    // Un token déjà remplacé qui revient = probable vol de token :
-    // on révoque toutes les sessions de l'utilisateur. La marge couvre
-    // les rafraîchissements simultanés légitimes (plusieurs onglets).
-    const rotated = !(await this.authRepository.revokeRefreshToken(tokenHash));
-    if (rotated) {
+    // Un token déjà remplacé qui revient :
+    // - dans la marge : rafraîchissements simultanés légitimes (StrictMode,
+    //   plusieurs onglets) → on délivre aussi une nouvelle paire de tokens ;
+    // - au-delà : probable vol de token → révocation de toutes les sessions.
+    const alreadyRotated =
+      !(await this.authRepository.revokeRefreshToken(tokenHash));
+    if (alreadyRotated) {
       const revokedAt = stored.revokedAt ?? new Date();
       if (Date.now() - revokedAt.getTime() > REFRESH_REUSE_GRACE_MS) {
         await this.authRepository.deleteAllRefreshTokens(stored.userId);
+        throw sessionExpired;
       }
-      throw sessionExpired;
     }
 
     const user = await this.usersService.findById(stored.userId);
