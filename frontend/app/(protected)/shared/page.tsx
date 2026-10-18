@@ -91,7 +91,7 @@ export default function SharedPage() {
                       className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
                       style={{
                         background: link.storageMode === 'sovereign' ? 'rgba(62,224,161,.16)' : 'rgba(110,168,254,.16)',
-                        color: link.storageMode === 'sovereign' ? '#7ff0c4' : '#a9caff',
+                        color: link.storageMode === 'sovereign' ? 'var(--color-sv-sovereign-text)' : 'var(--color-sv-cloud-text)',
                       }}
                     >
                       {link.storageMode === 'sovereign' ? 'Souverain' : 'Cloud'}
@@ -110,12 +110,12 @@ export default function SharedPage() {
                   className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-full"
                   style={{
                     background: link.status === 'active' ? 'rgba(66,214,127,.14)' : 'rgba(242,104,95,.14)',
-                    color: link.status === 'active' ? '#6be89a' : '#f2685f',
+                    color: link.status === 'active' ? 'var(--color-sv-success-text)' : 'var(--color-sv-danger)',
                   }}
                 >
                   <span
                     className="w-1.5 h-1.5 rounded-full"
-                    style={{ background: link.status === 'active' ? '#42d67f' : '#f2685f' }}
+                    style={{ background: link.status === 'active' ? '#42d67f' : 'var(--color-sv-danger)' }}
                   />
                   {link.status === 'active' ? 'Actif' : 'Expiré'}
                 </span>

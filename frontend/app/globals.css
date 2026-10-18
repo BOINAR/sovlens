@@ -1,17 +1,25 @@
 @import "tailwindcss";
 
-@theme {
+/* static : toutes les variables sont émises, même celles utilisées uniquement en style inline */
+@theme static {
+  /* Thème sombre (par défaut) */
   --color-sv-base: #0b0d10;
+  --color-sv-chrome: #0d0f13;
   --color-sv-surface: #14171d;
   --color-sv-surface2: #191d24;
   --color-sv-elevated: #1e232b;
   --color-sv-border: #262c35;
+  --color-sv-border-strong: #333b46;
   --color-sv-text: #eef1f4;
   --color-sv-text2: #a7adb6;
   --color-sv-text3: #6f7681;
   --color-sv-sovereign: #3ee0a1;
   --color-sv-cloud: #6ea8fe;
   --color-sv-accent: #3ee0a1;
+  --color-sv-sovereign-text: #7ff0c4;
+  --color-sv-cloud-text: #a9caff;
+  --color-sv-success-text: #6be89a;
+  --color-sv-danger: #f2685f;
 
   --font-display: 'Space Grotesk', system-ui, sans-serif;
   --font-body: 'Manrope', system-ui, sans-serif;
@@ -19,6 +27,7 @@
 }
 
 :root {
+  color-scheme: dark;
   --sv-soft: rgba(62, 224, 161, 0.1);
   --sv-ring: rgba(62, 224, 161, 0.35);
 }
@@ -27,6 +36,36 @@ body[data-mode='cloud'] {
   --color-sv-accent: #6ea8fe;
   --sv-soft: rgba(110, 168, 254, 0.1);
   --sv-ring: rgba(110, 168, 254, 0.35);
+}
+
+/* Thème clair — data-theme posé sur <html> avant le premier rendu (voir app/layout.tsx) */
+html[data-theme='light'] {
+  color-scheme: light;
+  --color-sv-base: #f4f6f8;
+  --color-sv-chrome: #ffffff;
+  --color-sv-surface: #ffffff;
+  --color-sv-surface2: #eef1f4;
+  --color-sv-elevated: #ffffff;
+  --color-sv-border: #dde2e8;
+  --color-sv-border-strong: #c7ced6;
+  --color-sv-text: #12161b;
+  --color-sv-text2: #4a525d;
+  --color-sv-text3: #7a828d;
+  --color-sv-sovereign: #0f9e6c;
+  --color-sv-cloud: #2b6fe0;
+  --color-sv-accent: #0f9e6c;
+  --color-sv-sovereign-text: #0b7a52;
+  --color-sv-cloud-text: #1f5fc4;
+  --color-sv-success-text: #15803d;
+  --color-sv-danger: #dc3b31;
+  --sv-soft: rgba(15, 158, 108, 0.1);
+  --sv-ring: rgba(15, 158, 108, 0.3);
+}
+
+html[data-theme='light'] body[data-mode='cloud'] {
+  --color-sv-accent: #2b6fe0;
+  --sv-soft: rgba(43, 111, 224, 0.1);
+  --sv-ring: rgba(43, 111, 224, 0.3);
 }
 
 * {
@@ -57,7 +96,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2a313b;
+  background: var(--color-sv-border-strong);
   border-radius: 8px;
   border: 2px solid var(--color-sv-base);
 }

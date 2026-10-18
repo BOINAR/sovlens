@@ -138,7 +138,7 @@ export default function UploadPage() {
                     className="h-full transition-all duration-200"
                     style={{
                       width: `${item.progress}%`,
-                      background: item.status === 'error' ? '#f2685f' : 'var(--color-sv-accent)',
+                      background: item.status === 'error' ? 'var(--color-sv-danger)' : 'var(--color-sv-accent)',
                     }}
                   />
                 </div>

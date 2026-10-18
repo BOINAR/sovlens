@@ -6,6 +6,7 @@ import {useAuth} from "@/lib/auth/auth-context";
 import {StorageProvider, useStorageMode} from "@/lib/storage/storage-context";
 import Link from "next/link";
 import UserAvatar from "@/components/UserAvatar";
+import ThemeToggle from "@/components/ThemeToggle";
 import {usersApi} from "@/lib/api/endpoints";
 import {ApiError} from "@/lib/api/types";
 
@@ -47,7 +48,7 @@ function NavLink({
         className="w-2 h-2 rounded-full shrink-0"
         style={{
           background: active ? "var(--color-sv-accent)" : "transparent",
-          border: active ? "none" : "1.5px solid #454d58",
+          border: active ? "none" : "1.5px solid var(--color-sv-border-strong)",
           boxShadow: active ? "0 0 10px var(--sv-ring)" : "none"
         }}
       />
@@ -146,14 +147,14 @@ function SidebarContent({onNavigate}: {onNavigate?: () => void}) {
         </div>
         <button
           onClick={() => (isSovereign ? setCloudMode() : setSovereignQuick())}
-          className="w-full bg-sv-surface2 border border-[#333b46] text-sv-text2 py-1.5 rounded-lg text-xs font-semibold">
+          className="w-full bg-sv-surface2 border border-sv-border-strong text-sv-text2 py-1.5 rounded-lg text-xs font-semibold">
           Basculer
         </button>
       </div>
 
       <div className="relative mt-3 pt-3 border-t border-sv-border">
         {menuOpen && (
-          <div className="absolute bottom-13 left-0 right-0 bg-sv-surface2 border border-[#2c333d] rounded-xl p-1.5 shadow-[0_14px_40px_rgba(0,0,0,.5)]">
+          <div className="absolute bottom-13 left-0 right-0 bg-sv-surface2 border border-sv-border-strong rounded-xl p-1.5 shadow-[0_14px_40px_rgba(0,0,0,.5)]">
             <input
               ref={avatarInputRef}
               type="file"
@@ -245,7 +246,7 @@ function AppShellInner({children}: {children: React.ReactNode}) {
 
   return (
     <div className="min-h-screen md:fixed md:inset-0 md:flex">
-      <div className="hidden md:block w-56 flex-none bg-[#0d0f13] border-r border-sv-border">
+      <div className="hidden md:block w-56 flex-none bg-sv-chrome border-r border-sv-border">
         <SidebarContent />
       </div>
 
@@ -255,14 +256,14 @@ function AppShellInner({children}: {children: React.ReactNode}) {
             className="absolute inset-0 bg-black/60"
             onClick={() => setDrawerOpen(false)}
           />
-          <div className="absolute left-0 top-0 bottom-0 w-64 bg-[#0d0f13] border-r border-sv-border">
+          <div className="absolute left-0 top-0 bottom-0 w-64 bg-sv-chrome border-r border-sv-border">
             <SidebarContent onNavigate={() => setDrawerOpen(false)} />
           </div>
         </div>
       )}
 
       <div className="flex-1 flex flex-col min-w-0 md:h-full">
-        <div className="h-14 md:h-15 flex-none border-b border-sv-border flex items-center gap-3 md:gap-4 px-4 md:px-5.5 bg-[#0d0f13]/70 backdrop-blur-md">
+        <div className="h-14 md:h-15 flex-none border-b border-sv-border flex items-center gap-3 md:gap-4 px-4 md:px-5.5 bg-sv-chrome/70 backdrop-blur-md">
           <button
             onClick={() => setDrawerOpen(true)}
             className="md:hidden w-8 h-8 flex-none flex flex-col items-center justify-center gap-1"
@@ -278,7 +279,7 @@ function AppShellInner({children}: {children: React.ReactNode}) {
 
           <div className="hidden sm:block flex-1 max-w-90 mx-auto">
             <div className="h-9.5 bg-sv-surface2 border border-sv-border rounded-lg flex items-center gap-2.5 px-3.5 text-sv-text3 text-[13px]">
-              <span className="w-3.5 h-3.5 rounded-full border-2 border-[#4a515b] shrink-0" />
+              <span className="w-3.5 h-3.5 rounded-full border-2 border-sv-border-strong shrink-0" />
               Rechercher lieux, dates, visages…
             </div>
           </div>
@@ -315,6 +316,8 @@ function AppShellInner({children}: {children: React.ReactNode}) {
               <span className="hidden sm:inline">Souverain</span>
             </button>
           </div>
+
+          <ThemeToggle />
 
           <div className="hidden sm:block flex-none">
             <UserAvatar user={user} className="w-8.5 h-8.5 text-[13px]" />

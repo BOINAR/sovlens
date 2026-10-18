@@ -197,7 +197,7 @@ export default function AlbumsPage() {
             <button
               key={photo.id}
               onClick={() => setOpenIndex(i)}
-              className="block w-full break-inside-avoid mb-3 rounded-xl overflow-hidden border border-[#20262f] aspect-square bg-sv-surface2 text-left">
+              className="block w-full break-inside-avoid mb-3 rounded-xl overflow-hidden border border-sv-border aspect-square bg-sv-surface2 text-left">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={photo.url}
@@ -272,13 +272,13 @@ export default function AlbumsPage() {
           <button
             key={album.id}
             onClick={() => setSelected(album)}
-            className="text-left border border-[#20262f] rounded-2xl overflow-hidden bg-sv-surface hover:border-sv-accent transition-colors">
+            className="text-left border border-sv-border rounded-2xl overflow-hidden bg-sv-surface hover:border-sv-accent transition-colors">
             <div
               className="h-33 grid gap-0.5"
               style={{
                 gridTemplateColumns: "1fr 1fr",
                 gridTemplateRows: "1fr 1fr",
-                background: "linear-gradient(145deg,#1b212b,#262e39)"
+                background: "linear-gradient(145deg, var(--color-sv-surface2), var(--color-sv-elevated))"
               }}>
               <div className="bg-white/3" />
               <div className="bg-white/6" />
@@ -310,7 +310,7 @@ export default function AlbumsPage() {
 
         <button
           onClick={() => setCreating(true)}
-          className="border-[1.5px] border-dashed border-[#333b46] rounded-2xl flex flex-col items-center justify-center gap-2.5 min-h-50 text-sv-text2 hover:border-sv-accent hover:text-sv-accent transition-colors">
+          className="border-[1.5px] border-dashed border-sv-border-strong rounded-2xl flex flex-col items-center justify-center gap-2.5 min-h-50 text-sv-text2 hover:border-sv-accent hover:text-sv-accent transition-colors">
           <div className="w-8.5 h-8.5 rounded-full border-2 border-current flex items-center justify-center text-xl font-light">
             +
           </div>

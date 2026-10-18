@@ -93,7 +93,7 @@ export default function SettingsPage() {
               disabled={switching}
               className="text-left rounded-2xl p-4 transition-all disabled:opacity-60"
               style={{
-                border: !isSovereign ? '1.5px solid #6ea8fe' : '1px solid #262c35',
+                border: !isSovereign ? '1.5px solid var(--color-sv-cloud)' : '1px solid var(--color-sv-border)',
                 background: !isSovereign ? 'rgba(255,255,255,.02)' : 'var(--color-sv-base)',
                 boxShadow: !isSovereign ? '0 0 0 4px rgba(110,168,254,.1)' : 'none',
               }}
@@ -105,7 +105,7 @@ export default function SettingsPage() {
                 </span>
                 <span
                   className="w-5 h-5 rounded-full shrink-0"
-                  style={!isSovereign ? { background: '#6ea8fe', boxShadow: '0 0 10px rgba(110,168,254,.5)' } : { border: '2px solid #333b46' }}
+                  style={!isSovereign ? { background: 'var(--color-sv-cloud)', boxShadow: '0 0 10px rgba(110,168,254,.5)' } : { border: '2px solid var(--color-sv-border-strong)' }}
                 />
               </div>
               <p className="text-[12.5px] text-sv-text2 mb-3 min-h-13">
@@ -124,7 +124,7 @@ export default function SettingsPage() {
               disabled={switching}
               className="text-left rounded-2xl p-4 transition-all disabled:opacity-60"
               style={{
-                border: isSovereign ? '1.5px solid #3ee0a1' : '1px solid #262c35',
+                border: isSovereign ? '1.5px solid var(--color-sv-sovereign)' : '1px solid var(--color-sv-border)',
                 background: isSovereign ? 'rgba(255,255,255,.02)' : 'var(--color-sv-base)',
                 boxShadow: isSovereign ? '0 0 0 4px rgba(62,224,161,.1)' : 'none',
               }}
@@ -136,7 +136,7 @@ export default function SettingsPage() {
                 </span>
                 <span
                   className="w-5 h-5 rounded-full shrink-0"
-                  style={isSovereign ? { background: '#3ee0a1', boxShadow: '0 0 10px rgba(62,224,161,.5)' } : { border: '2px solid #333b46' }}
+                  style={isSovereign ? { background: 'var(--color-sv-sovereign)', boxShadow: '0 0 10px rgba(62,224,161,.5)' } : { border: '2px solid var(--color-sv-border-strong)' }}
                 />
               </div>
               <p className="text-[12.5px] text-sv-text2 mb-3 min-h-13">

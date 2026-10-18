@@ -91,7 +91,7 @@ export default function LoginPage() {
       </div>
 
       {/* Formulaire : pleine largeur sous md, largeur fixe à partir de md */}
-      <div className="flex-1 md:flex-none md:w-110 flex items-center justify-center p-6 sm:p-8 md:p-10 bg-[#0d0f13]">
+      <div className="flex-1 md:flex-none md:w-110 flex items-center justify-center p-6 sm:p-8 md:p-10 bg-sv-chrome">
         <div className="w-full max-w-85">
           {/* Logo visible uniquement sur mobile, puisque le panneau gauche est caché */}
           <div className="flex md:hidden items-center gap-3 mb-8 justify-center">

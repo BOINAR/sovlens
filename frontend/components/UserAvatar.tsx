@@ -16,7 +16,7 @@ export default function UserAvatar({ user, className = '' }: UserAvatarProps) {
 
   return (
     <div
-      className={`rounded-full overflow-hidden flex-none flex items-center justify-center bg-gradient-to-br from-[#2c333d] to-[#1a1e24] border border-[#333b46] text-sv-text2 font-semibold ${className}`}
+      className={`rounded-full overflow-hidden flex-none flex items-center justify-center bg-gradient-to-br from-sv-surface2 to-sv-elevated border border-sv-border-strong text-sv-text2 font-semibold ${className}`}
     >
       {avatarUrl && avatarUrl !== failedUrl ? (
         // URL signée S3 externe : next/image n'apporte rien ici

@@ -51,24 +51,24 @@ export function PhotoDetailOverlay({
   return (
     <div className="fixed inset-0 z-30 bg-[#06080b]/86 backdrop-blur-md flex flex-col md:flex-row">
       <div className="flex-1 flex items-center justify-center relative p-4 md:p-10">
-        <button onClick={onClose} className="absolute top-4 left-4 md:top-5.5 md:left-5.5 w-9 h-9 md:w-9.5 md:h-9.5 rounded-full bg-white/6 border border-[#333b46] flex items-center justify-center text-sv-text2">
+        <button onClick={onClose} className="absolute top-4 left-4 md:top-5.5 md:left-5.5 w-9 h-9 md:w-9.5 md:h-9.5 rounded-full bg-white/6 border border-sv-border-strong flex items-center justify-center text-sv-text2">
           ✕
         </button>
         {hasPrev && onPrev && (
-          <button onClick={onPrev} className="hidden md:flex absolute left-5.5 top-1/2 -translate-y-1/2 w-10.5 h-10.5 rounded-full bg-white/6 border border-[#333b46] items-center justify-center">
+          <button onClick={onPrev} className="hidden md:flex absolute left-5.5 top-1/2 -translate-y-1/2 w-10.5 h-10.5 rounded-full bg-white/6 border border-sv-border-strong items-center justify-center">
             ←
           </button>
         )}
         {hasNext && onNext && (
-          <button onClick={onNext} className="hidden md:flex absolute right-5.5 top-1/2 -translate-y-1/2 w-10.5 h-10.5 rounded-full bg-white/6 border border-[#333b46] items-center justify-center">
+          <button onClick={onNext} className="hidden md:flex absolute right-5.5 top-1/2 -translate-y-1/2 w-10.5 h-10.5 rounded-full bg-white/6 border border-sv-border-strong items-center justify-center">
             →
           </button>
         )}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={photo.url} alt={photo.originalName} className="max-w-full md:max-w-[80%] max-h-[50vh] md:max-h-[70%] rounded-2xl border border-[#2c333d] shadow-[0_30px_90px_rgba(0,0,0,.6)] object-contain" />
+        <img src={photo.url} alt={photo.originalName} className="max-w-full md:max-w-[80%] max-h-[50vh] md:max-h-[70%] rounded-2xl border border-sv-border-strong shadow-[0_30px_90px_rgba(0,0,0,.6)] object-contain" />
       </div>
 
-      <div className="w-full md:w-85 flex-none bg-[#0d0f13] border-t md:border-t-0 md:border-l border-sv-border p-5 md:p-6 flex flex-col overflow-y-auto">
+      <div className="w-full md:w-85 flex-none bg-sv-chrome border-t md:border-t-0 md:border-l border-sv-border p-5 md:p-6 flex flex-col overflow-y-auto">
         <div className="font-display font-bold text-lg mb-1 truncate">{photo.originalName}</div>
         <div className="text-[12.5px] text-sv-text3 mb-5">{formatDate(photo.createdAt)}</div>
 
@@ -76,7 +76,7 @@ export function PhotoDetailOverlay({
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full w-fit text-xs font-semibold mb-5"
           style={{
             background: 'var(--sv-soft)',
-            color: photo.storageMode === 'sovereign' ? '#7ff0c4' : '#a9caff',
+            color: photo.storageMode === 'sovereign' ? 'var(--color-sv-sovereign-text)' : 'var(--color-sv-cloud-text)',
             border: '1px solid var(--sv-ring)',
           }}
         >
@@ -98,11 +98,11 @@ export function PhotoDetailOverlay({
           <a href={photo.url} download={photo.originalName} className="w-full text-center bg-sv-accent text-[#04150e] h-11 rounded-[11px] font-bold text-sm flex items-center justify-center">
             Télécharger l&apos;original
           </a>
-          <button onClick={handleShare} className="w-full bg-sv-surface2 border border-[#333b46] h-10.5 rounded-[11px] font-semibold text-[13.5px]">
+          <button onClick={handleShare} className="w-full bg-sv-surface2 border border-sv-border-strong h-10.5 rounded-[11px] font-semibold text-[13.5px]">
             Partager…
           </button>
           {removeFromAlbumLabel && onRemoveFromAlbum && (
-            <button onClick={() => onRemoveFromAlbum(photo.id)} className="w-full bg-sv-surface2 border border-[#333b46] h-10.5 rounded-[11px] font-semibold text-[13.5px]">
+            <button onClick={() => onRemoveFromAlbum(photo.id)} className="w-full bg-sv-surface2 border border-sv-border-strong h-10.5 rounded-[11px] font-semibold text-[13.5px]">
               {removeFromAlbumLabel}
             </button>
           )}
