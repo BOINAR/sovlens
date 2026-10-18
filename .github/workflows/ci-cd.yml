@@ -160,6 +160,7 @@ jobs:
             export POSTGRES_PASSWORD=${{ secrets.STAGING_POSTGRES_PASSWORD }}
             export POSTGRES_DB=${{ secrets.STAGING_POSTGRES_DB }}
             export JWT_SECRET=${{ secrets.STAGING_JWT_SECRET }}
+            export STORAGE_ENCRYPTION_KEY='${{ secrets.STAGING_STORAGE_ENCRYPTION_KEY }}'
             export S3_CLOUD_ACCESS_KEY=${{ secrets.STAGING_S3_ACCESS_KEY }}
             export S3_CLOUD_SECRET_KEY=${{ secrets.STAGING_S3_SECRET_KEY }}
             export S3_CLOUD_BUCKET=${{ secrets.STAGING_S3_BUCKET }}
@@ -177,7 +178,7 @@ jobs:
 
             # garage.toml ne contient plus aucun secret : simple copie du template
             cp garage.toml.template garage.toml
-            envsubst '${IMAGE_TAG} ${SECRET_VERSION} ${POSTGRES_USER} ${POSTGRES_PASSWORD} ${POSTGRES_DB} ${JWT_SECRET} ${S3_CLOUD_ACCESS_KEY} ${S3_CLOUD_SECRET_KEY} ${S3_CLOUD_BUCKET}' < docker-stack.yml > docker-stack-resolved.yml
+            envsubst '${IMAGE_TAG} ${SECRET_VERSION} ${POSTGRES_USER} ${POSTGRES_PASSWORD} ${POSTGRES_DB} ${JWT_SECRET} ${STORAGE_ENCRYPTION_KEY} ${S3_CLOUD_ACCESS_KEY} ${S3_CLOUD_SECRET_KEY} ${S3_CLOUD_BUCKET}' < docker-stack.yml > docker-stack-resolved.yml
             docker stack deploy -c docker-stack-resolved.yml sovlens --with-registry-auth
             rm docker-stack-resolved.yml
             docker service update --force sovlens_caddy

@@ -15,6 +15,13 @@
       "when": 1792318251602,
       "tag": "0001_add_user_avatar",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792320813126,
+      "tag": "0002_refresh_token_revocation",
+      "breakpoints": true
     }
   ]
 }

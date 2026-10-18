@@ -22,6 +22,7 @@ Aucun secret n'est versionné dans le dépôt ni écrit en clair sur le disque d
 | `STAGING_POSTGRES_PASSWORD` | Variable d'environnement | Postgres et `DATABASE_URL` du backend |
 | `STAGING_POSTGRES_DB` | Variable d'environnement | Postgres et `DATABASE_URL` du backend |
 | `STAGING_JWT_SECRET` | Variable d'environnement | Backend : signature des JWT |
+| `STAGING_STORAGE_ENCRYPTION_KEY` | Variable d'environnement | Backend : chiffrement AES-256-GCM des identifiants S3 souverains en base (32 octets en base64, `openssl rand -base64 32`). Sa perte rend ces identifiants illisibles : les utilisateurs devront les ressaisir. |
 | `STAGING_S3_ACCESS_KEY` | Variable d'environnement | Backend : accès au Garage cloud |
 | `STAGING_S3_SECRET_KEY` | Variable d'environnement | Backend : accès au Garage cloud |
 | `STAGING_S3_BUCKET` | Variable d'environnement | Backend : bucket du Garage cloud |

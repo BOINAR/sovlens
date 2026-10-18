@@ -1,6 +1,6 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MailerModule } from '@nestjs-modules/mailer';
+import { MailModule } from './mail/mail.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -13,21 +13,11 @@ import { StorageConfigModule } from './storage-config/storage-config.module';
 import { SharingModule } from './sharing/sharing.module';
 import { HealthController } from './health.controller';
 import { MetricsModule } from './metrics/metrics.module';
-import { HttpMetricsMiddleware } from './metrics/http-metrics.middleware';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    MailerModule.forRoot({
-      transport: {
-        host: process.env.MAIL_HOST,
-        port: Number(process.env.MAIL_PORT),
-        secure: false,
-      },
-      defaults: {
-        from: process.env.MAIL_FROM,
-      },
-    }),
+    MailModule,
     DbModule,
     UsersModule,
     AuthModule,
@@ -41,8 +31,4 @@ import { HttpMetricsMiddleware } from './metrics/http-metrics.middleware';
   controllers: [AppController, HealthController],
   providers: [AppService],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(HttpMetricsMiddleware).forRoutes('*');
-  }
-}
+export class AppModule {}

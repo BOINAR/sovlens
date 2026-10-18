@@ -6,6 +6,11 @@ import {
   GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import {
+  assertEndpointHostUsable,
+  guardedHttpAgent,
+  guardedHttpsAgent,
+} from './endpoint-guard';
 
 export interface IStorageProvider {
   upload(file: Buffer, key: string, mimeType: string): Promise<string>;
@@ -93,6 +98,9 @@ export class SovereignStorageProvider implements IStorageProvider {
     secretKey: string,
     bucket: string,
   ) {
+    // Endpoint saisi par l'utilisateur : IP littérale vérifiée ici,
+    // noms DNS vérifiés à chaque connexion par les agents protégés
+    assertEndpointHostUsable(endpoint);
     this.client = new S3Client({
       endpoint,
       region: 'garage',
@@ -103,6 +111,10 @@ export class SovereignStorageProvider implements IStorageProvider {
       forcePathStyle: true,
       requestChecksumCalculation: 'WHEN_REQUIRED',
       responseChecksumValidation: 'WHEN_REQUIRED',
+      requestHandler: {
+        httpAgent: guardedHttpAgent,
+        httpsAgent: guardedHttpsAgent,
+      },
     });
     this.bucket = bucket;
   }

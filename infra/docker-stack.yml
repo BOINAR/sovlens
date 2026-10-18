@@ -6,12 +6,16 @@ services:
       FRONTEND_URL: https://sovlens.stellodev.com
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       JWT_SECRET: ${JWT_SECRET}
+      # Clé AES-256 (base64, 32 octets) du chiffrement au repos des identifiants S3 souverains
+      STORAGE_ENCRYPTION_KEY: ${STORAGE_ENCRYPTION_KEY}
       JWT_EXPIRES_IN: 7d
       S3_CLOUD_ENDPOINT: http://garage:3900
       S3_CLOUD_PUBLIC_ENDPOINT: https://sovlens-garage.stellodev.com
       S3_CLOUD_ACCESS_KEY: ${S3_CLOUD_ACCESS_KEY}
       S3_CLOUD_SECRET_KEY: ${S3_CLOUD_SECRET_KEY}
       S3_CLOUD_BUCKET: ${S3_CLOUD_BUCKET}
+      # Hôtes privés autorisés comme endpoint souverain (Garage du homelab via Tailscale)
+      SOVEREIGN_ENDPOINT_ALLOWED_HOSTS: "192.168.1.20"
       NODE_ENV: production
     networks:
       - sovlens-net

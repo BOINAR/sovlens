@@ -1,18 +1,14 @@
 import {
   BadRequestException,
-  Body,
   Controller,
   Delete,
   Get,
-  Param,
-  Patch,
   Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { FastifyRequest } from 'fastify';
 import { UsersService } from './users.service';
-import { UpdateUserInput, updateUserSchema } from './users.validation';
 import { JwtGuard } from '../auth/jwt.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 
@@ -46,14 +42,5 @@ export class UsersController {
     return this.usersService.removeAvatar(user.sub);
   }
 
-  @Get(':id')
-  findById(@Param('id') id: string) {
-    return this.usersService.findById(id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() body: unknown) {
-    const data: UpdateUserInput = updateUserSchema.parse(body);
-    return this.usersService.update(id, data);
-  }
+  // Pas de routes /users/:id : un utilisateur n'agit que sur son propre compte (/users/me)
 }

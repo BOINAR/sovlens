@@ -2,6 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { StorageConfigService } from './storage-config.service';
 import { StorageConfigRepository } from './storage-config.repository';
 
+// Le Garage du homelab (IP privée) est autorisé explicitement, comme en production
+process.env.SOVEREIGN_ENDPOINT_ALLOWED_HOSTS = '192.168.1.20';
+
 describe('StorageConfigService', () => {
   let service: StorageConfigService;
   let storageConfigRepository: jest.Mocked<StorageConfigRepository>;

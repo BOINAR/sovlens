@@ -1,15 +1,49 @@
+# En-têtes de sécurité communs à tous les sites
+(security_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}
+
 sovlens-api.stellodev.com {
-    reverse_proxy sovlens_backend:4000
+	import security_headers
+	header {
+		X-Frame-Options "DENY"
+		Content-Security-Policy "default-src 'none'; frame-ancestors 'none'"
+	}
+
+	# /metrics n'est lu que par Prometheus, en interne sur le réseau overlay (backend:4000)
+	respond /metrics* 404
+
+	reverse_proxy sovlens_backend:4000
 }
 
 sovlens.stellodev.com {
-    reverse_proxy sovlens_frontend:3000
+	import security_headers
+	header {
+		X-Frame-Options "DENY"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+		# Next.js injecte des scripts inline (pas de nonce) : 'unsafe-inline' requis pour script-src.
+		# img-src ouvert en http/https : les photos viennent du stockage souverain de chaque
+		# utilisateur (endpoint libre, ex. http://192.168.1.20:3900 via Tailscale).
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https: http:; connect-src 'self' https://sovlens-api.stellodev.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+	}
+
+	reverse_proxy sovlens_frontend:3000
 }
 
 sovlens-garage.stellodev.com {
-    reverse_proxy garage:3900
+	import security_headers
+
+	reverse_proxy garage:3900
 }
 
 sovlens-grafana.stellodev.com {
-    reverse_proxy grafana:3000
+	import security_headers
+	header X-Frame-Options "SAMEORIGIN"
+
+	reverse_proxy grafana:3000
 }

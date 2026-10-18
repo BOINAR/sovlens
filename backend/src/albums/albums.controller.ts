@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
@@ -42,7 +43,7 @@ export class AlbumsController {
   @Get(':id')
   findOne(
     @CurrentUser() user: { sub: string; email: string },
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.albumsService.findOne(user.sub, id);
   }
@@ -50,7 +51,7 @@ export class AlbumsController {
   @Patch(':id')
   update(
     @CurrentUser() user: { sub: string; email: string },
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() body: unknown,
   ) {
     const data = updateAlbumSchema.parse(body);
@@ -61,7 +62,7 @@ export class AlbumsController {
   @HttpCode(HttpStatus.OK)
   delete(
     @CurrentUser() user: { sub: string; email: string },
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.albumsService.delete(user.sub, id);
   }
@@ -70,7 +71,7 @@ export class AlbumsController {
   @HttpCode(HttpStatus.OK)
   addPhoto(
     @CurrentUser() user: { sub: string; email: string },
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() body: unknown,
   ) {
     const data = addPhotoToAlbumSchema.parse(body);
@@ -81,8 +82,8 @@ export class AlbumsController {
   @HttpCode(HttpStatus.OK)
   removePhoto(
     @CurrentUser() user: { sub: string; email: string },
-    @Param('id') id: string,
-    @Param('photoId') photoId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('photoId', ParseUUIDPipe) photoId: string,
   ) {
     return this.albumsService.removePhoto(user.sub, id, photoId);
   }

@@ -8,6 +8,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { FastifyRequest, FastifyReply } from 'fastify';
+import { RouteConfig } from '@nestjs/platform-fastify';
 import { AuthService } from './auth.service';
 import {
   registerSchema,
@@ -16,11 +17,15 @@ import {
   resetPasswordSchema,
 } from './auth.validation';
 
+const FIFTEEN_MINUTES = 15 * 60 * 1000;
+const ONE_HOUR = 60 * 60 * 1000;
+
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @RouteConfig({ rateLimit: { max: 5, timeWindow: ONE_HOUR } })
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() body: unknown) {
     const data = registerSchema.parse(body);
@@ -28,6 +33,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @RouteConfig({ rateLimit: { max: 10, timeWindow: FIFTEEN_MINUTES } })
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() body: unknown,
@@ -95,6 +101,7 @@ export class AuthController {
   }
 
   @Post('forgot-password')
+  @RouteConfig({ rateLimit: { max: 5, timeWindow: ONE_HOUR } })
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body() body: unknown) {
     const data = forgotPasswordSchema.parse(body);
@@ -102,6 +109,7 @@ export class AuthController {
   }
 
   @Post('reset-password')
+  @RouteConfig({ rateLimit: { max: 10, timeWindow: FIFTEEN_MINUTES } })
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body() body: unknown) {
     const data = resetPasswordSchema.parse(body);

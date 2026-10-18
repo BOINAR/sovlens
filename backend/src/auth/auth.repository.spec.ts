@@ -13,6 +13,7 @@ describe('AuthRepository', () => {
     userId,
     tokenHash: 'hash-abc',
     expiresAt: new Date(Date.now() + 100000),
+    revokedAt: null,
     createdAt: new Date(),
   };
 
@@ -62,11 +63,11 @@ describe('AuthRepository', () => {
     });
   });
 
-  describe('findRefreshToken', () => {
-    it('devrait retourner un refresh token valide', async () => {
+  describe('findRefreshTokenByHash', () => {
+    it('devrait retourner le refresh token', async () => {
       mockDb.where.mockResolvedValue([mockRefreshToken]);
 
-      const result = await repository.findRefreshToken('hash-abc');
+      const result = await repository.findRefreshTokenByHash('hash-abc');
 
       expect(result).toEqual(mockRefreshToken);
     });
@@ -74,9 +75,30 @@ describe('AuthRepository', () => {
     it('devrait retourner undefined si aucun token trouvé', async () => {
       mockDb.where.mockResolvedValue([]);
 
-      const result = await repository.findRefreshToken('unknown-hash');
+      const result = await repository.findRefreshTokenByHash('unknown-hash');
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('revokeRefreshToken', () => {
+    it('devrait retourner true si le token actif a été révoqué', async () => {
+      mockDb.where.mockReturnThis();
+      mockDb.returning.mockResolvedValue([{ id: 'token-id-123' }]);
+
+      await expect(repository.revokeRefreshToken('hash-abc')).resolves.toBe(
+        true,
+      );
+      expect(mockDb.update).toHaveBeenCalled();
+    });
+
+    it('devrait retourner false si le token était déjà révoqué', async () => {
+      mockDb.where.mockReturnThis();
+      mockDb.returning.mockResolvedValue([]);
+
+      await expect(repository.revokeRefreshToken('hash-abc')).resolves.toBe(
+        false,
+      );
     });
   });
 

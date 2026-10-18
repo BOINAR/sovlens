@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { MailerService } from '@nestjs-modules/mailer';
+import { MailService } from '../mail/mail.service';
 import * as argon2 from 'argon2';
 import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
@@ -17,13 +17,19 @@ import {
   ResetPasswordInput,
 } from './auth.validation';
 
+const REFRESH_REUSE_GRACE_MS = 30 * 1000;
+
 @Injectable()
 export class AuthService {
+  // Hash factice vérifié quand l'email est inconnu : même temps de réponse
+  // qu'un mauvais mot de passe, pour ne pas révéler l'existence du compte
+  private dummyPasswordHash?: Promise<string>;
+
   constructor(
     private readonly usersService: UsersService,
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
-    private readonly mailerService: MailerService,
+    private readonly mailService: MailService,
   ) {}
 
   // ─── Register ─────────────────────────────────────────────────────
@@ -49,6 +55,14 @@ export class AuthService {
   async login(data: LoginInput) {
     const user = await this.usersService.findByEmail(data.email);
     if (!user) {
+      this.dummyPasswordHash ??= argon2.hash(
+        crypto.randomBytes(32).toString('hex'),
+      );
+      try {
+        await argon2.verify(await this.dummyPasswordHash, data.password);
+      } catch {
+        // résultat sans importance : seul le temps de calcul compte
+      }
       throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
 
@@ -63,6 +77,7 @@ export class AuthService {
     const accessToken = await this.generateAccessToken(user.id, user.email);
     const { rawToken, tokenHash, expiresAt } = this.generateRefreshToken();
 
+    await this.authRepository.deleteExpiredRefreshTokens(user.id);
     await this.authRepository.createRefreshToken(user.id, tokenHash, expiresAt);
 
     return { accessToken, refreshToken: rawToken };
@@ -72,17 +87,29 @@ export class AuthService {
 
   async refresh(rawRefreshToken: string) {
     const tokenHash = this.hashToken(rawRefreshToken);
-    const stored = await this.authRepository.findRefreshToken(tokenHash);
+    const stored = await this.authRepository.findRefreshTokenByHash(tokenHash);
+    const sessionExpired = new UnauthorizedException(
+      'Session expirée, veuillez vous reconnecter',
+    );
 
-    if (!stored) {
-      throw new UnauthorizedException(
-        'Session expirée, veuillez vous reconnecter',
-      );
+    if (!stored || stored.expiresAt <= new Date()) {
+      throw sessionExpired;
+    }
+
+    // Un token déjà remplacé qui revient = probable vol de token :
+    // on révoque toutes les sessions de l'utilisateur. La marge couvre
+    // les rafraîchissements simultanés légitimes (plusieurs onglets).
+    const rotated = !(await this.authRepository.revokeRefreshToken(tokenHash));
+    if (rotated) {
+      const revokedAt = stored.revokedAt ?? new Date();
+      if (Date.now() - revokedAt.getTime() > REFRESH_REUSE_GRACE_MS) {
+        await this.authRepository.deleteAllRefreshTokens(stored.userId);
+      }
+      throw sessionExpired;
     }
 
     const user = await this.usersService.findById(stored.userId);
 
-    await this.authRepository.deleteRefreshToken(tokenHash);
     const {
       rawToken,
       tokenHash: newHash,
@@ -124,7 +151,7 @@ export class AuthService {
 
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`;
 
-    await this.mailerService.sendMail({
+    await this.mailService.sendMail({
       to: user.email,
       subject: 'Réinitialisation de votre mot de passe Sovlens',
       html: `

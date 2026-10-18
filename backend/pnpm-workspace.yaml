@@ -6,3 +6,10 @@ allowBuilds:
   '@swc/core': true
   argon2: true
   esbuild: true
+# Versions corrigées imposées aux dépendances transitives (failles connues).
+# Dupliqué dans package.json > pnpm.overrides pour pnpm 9 (CI) : garder les deux identiques.
+overrides:
+  fastify: ^5.12.7
+  find-my-way: ^9.9.0
+  fast-uri: ^3.1.8
+  '@fastify/busboy': ^3.2.2

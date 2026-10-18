@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
-import { MailerService } from '@nestjs-modules/mailer';
+import { MailService } from '../mail/mail.service';
 import {
   BadRequestException,
   ConflictException,
@@ -18,7 +18,7 @@ describe('AuthService', () => {
   let usersService: jest.Mocked<UsersService>;
   let authRepository: jest.Mocked<AuthRepository>;
   let jwtService: jest.Mocked<JwtService>;
-  let mailerService: jest.Mocked<MailerService>;
+  let mailerService: jest.Mocked<MailService>;
 
   const mockUser = {
     id: 'user-id-123',
@@ -46,7 +46,9 @@ describe('AuthService', () => {
           provide: AuthRepository,
           useValue: {
             createRefreshToken: jest.fn(),
-            findRefreshToken: jest.fn(),
+            findRefreshTokenByHash: jest.fn(),
+            revokeRefreshToken: jest.fn(),
+            deleteExpiredRefreshTokens: jest.fn(),
             deleteRefreshToken: jest.fn(),
             deleteAllRefreshTokens: jest.fn(),
             createPasswordResetToken: jest.fn(),
@@ -61,7 +63,7 @@ describe('AuthService', () => {
           },
         },
         {
-          provide: MailerService,
+          provide: MailService,
           useValue: {
             sendMail: jest.fn().mockResolvedValue(undefined),
           },
@@ -73,7 +75,7 @@ describe('AuthService', () => {
     usersService = module.get(UsersService);
     authRepository = module.get(AuthRepository);
     jwtService = module.get(JwtService);
-    mailerService = module.get(MailerService);
+    mailerService = module.get(MailService);
 
     jest.clearAllMocks();
   });
@@ -137,6 +139,9 @@ describe('AuthService', () => {
           password: 'password123',
         }),
       ).rejects.toThrow(UnauthorizedException);
+
+      // Vérification factice pour un temps de réponse identique
+      expect(argon2.verify).toHaveBeenCalled();
     });
 
     it('devrait rejeter si le mot de passe est incorrect', async () => {
@@ -150,34 +155,77 @@ describe('AuthService', () => {
   });
 
   describe('refresh', () => {
-    it('devrait générer de nouveaux tokens avec rotation', async () => {
-      const storedToken = {
-        id: 'token-id',
-        userId: mockUser.id,
-        tokenHash: 'old-hash',
-        expiresAt: new Date(Date.now() + 100000),
-        createdAt: new Date(),
-      };
+    const storedToken = {
+      id: 'token-id',
+      userId: 'user-id-123',
+      tokenHash: 'old-hash',
+      expiresAt: new Date(Date.now() + 100000),
+      revokedAt: null as Date | null,
+      createdAt: new Date(),
+    };
 
-      authRepository.findRefreshToken.mockResolvedValue(storedToken);
+    it('devrait révoquer l’ancien token et en générer un nouveau', async () => {
+      authRepository.findRefreshTokenByHash.mockResolvedValue(storedToken);
+      authRepository.revokeRefreshToken.mockResolvedValue(true);
       usersService.findById.mockResolvedValue(mockUser);
-      authRepository.deleteRefreshToken.mockResolvedValue(undefined);
       authRepository.createRefreshToken.mockResolvedValue({} as any);
 
       const result = await service.refresh('raw-refresh-token');
 
-      expect(authRepository.deleteRefreshToken).toHaveBeenCalled();
+      expect(authRepository.revokeRefreshToken).toHaveBeenCalled();
       expect(authRepository.createRefreshToken).toHaveBeenCalled();
+      expect(authRepository.deleteAllRefreshTokens).not.toHaveBeenCalled();
       expect(result).toHaveProperty('accessToken');
       expect(result).toHaveProperty('refreshToken');
     });
 
     it('devrait rejeter si le refresh token est introuvable', async () => {
-      authRepository.findRefreshToken.mockResolvedValue(undefined);
+      authRepository.findRefreshTokenByHash.mockResolvedValue(undefined);
 
       await expect(service.refresh('invalid-token')).rejects.toThrow(
         UnauthorizedException,
       );
+    });
+
+    it('devrait rejeter un refresh token expiré', async () => {
+      authRepository.findRefreshTokenByHash.mockResolvedValue({
+        ...storedToken,
+        expiresAt: new Date(Date.now() - 1000),
+      });
+
+      await expect(service.refresh('raw-refresh-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(authRepository.revokeRefreshToken).not.toHaveBeenCalled();
+    });
+
+    it('devrait révoquer toutes les sessions si un token déjà remplacé est réutilisé', async () => {
+      authRepository.findRefreshTokenByHash.mockResolvedValue({
+        ...storedToken,
+        revokedAt: new Date(Date.now() - 5 * 60 * 1000),
+      });
+      authRepository.revokeRefreshToken.mockResolvedValue(false);
+
+      await expect(service.refresh('raw-refresh-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(authRepository.deleteAllRefreshTokens).toHaveBeenCalledWith(
+        storedToken.userId,
+      );
+      expect(authRepository.createRefreshToken).not.toHaveBeenCalled();
+    });
+
+    it('ne devrait pas révoquer les sessions pour un rafraîchissement simultané', async () => {
+      authRepository.findRefreshTokenByHash.mockResolvedValue({
+        ...storedToken,
+        revokedAt: new Date(),
+      });
+      authRepository.revokeRefreshToken.mockResolvedValue(false);
+
+      await expect(service.refresh('raw-refresh-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(authRepository.deleteAllRefreshTokens).not.toHaveBeenCalled();
     });
   });
 

@@ -164,6 +164,9 @@ describe('SharingService', () => {
 
       expect(result.type).toBe('photo');
       expect(result.resource).toHaveProperty('url');
+      // Route publique : ni propriétaire ni clé S3 exposés
+      expect(result.resource).not.toHaveProperty('userId');
+      expect(result.resource).not.toHaveProperty('objectKey');
       expect(storageService.getProvider).toHaveBeenCalledWith(
         mockPhoto.storageMode,
         undefined,

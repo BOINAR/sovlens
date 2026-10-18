@@ -9,7 +9,12 @@ export const updateStorageConfigSchema = z.discriminatedUnion('mode', [
     endpoint: z.url({ error: 'URL invalide' }).optional(),
     accessKey: z.string().min(1, { error: 'Access key requis' }).optional(),
     secretKey: z.string().min(1, { error: 'Secret key requis' }).optional(),
-    bucket: z.string().min(1, { error: 'Bucket requis' }).optional(),
+    bucket: z
+      .string()
+      .regex(/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/, {
+        error: 'Nom de bucket invalide',
+      })
+      .optional(),
   }),
 ]);
 

@@ -21,6 +21,8 @@ export const refreshTokensTable = pgTable('refresh_tokens', {
     .references(() => usersTable.id, { onDelete: 'cascade' }),
   tokenHash: text('token_hash').notNull(),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  // Renseigné à la rotation : un token révoqué réutilisé déclenche la révocation de la famille
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),

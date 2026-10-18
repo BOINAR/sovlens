@@ -4,3 +4,9 @@ packages:
 allowBuilds:
   sharp: true
   unrs-resolver: true
+# Versions corrigées imposées aux dépendances transitives (failles connues).
+# Dupliqué dans package.json > pnpm.overrides pour pnpm 9 (CI) : garder les deux identiques.
+overrides:
+  browserslist: ^4.28.7
+  source-map-js: ^1.2.2
+  baseline-browser-mapping: ^2.11.0

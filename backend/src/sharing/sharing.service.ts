@@ -11,6 +11,23 @@ import { StorageConfigRepository } from '../storage-config/storage-config.reposi
 import { CreateShareLinkInput } from './sharing.validation';
 import { randomUUID } from 'crypto';
 
+// Champs exposés sur la route publique de partage : ni userId, ni clé S3
+function toPublicPhoto(photo: {
+  id: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  createdAt: Date;
+}) {
+  return {
+    id: photo.id,
+    originalName: photo.originalName,
+    mimeType: photo.mimeType,
+    size: photo.size,
+    createdAt: photo.createdAt,
+  };
+}
+
 @Injectable()
 export class SharingService {
   constructor(
@@ -120,7 +137,7 @@ export class SharingService {
         photo.storageMode,
         photo.objectKey,
       );
-      return { type: 'photo', resource: { ...photo, url } };
+      return { type: 'photo', resource: { ...toPublicPhoto(photo), url } };
     }
 
     if (link.albumId) {
@@ -132,7 +149,7 @@ export class SharingService {
       );
       const photosWithUrls = await Promise.all(
         photos.map(async (photo) => ({
-          ...photo,
+          ...toPublicPhoto(photo),
           url: await this.resolveUrl(
             link.userId,
             photo.storageMode,
@@ -141,7 +158,15 @@ export class SharingService {
         })),
       );
 
-      return { type: 'album', resource: { ...album, photos: photosWithUrls } };
+      return {
+        type: 'album',
+        resource: {
+          id: album.id,
+          name: album.name,
+          createdAt: album.createdAt,
+          photos: photosWithUrls,
+        },
+      };
     }
 
     throw new NotFoundException('Ressource introuvable');

@@ -29,15 +29,17 @@ export class PhotosService {
     mimeType: string,
     size: number,
   ) {
-    const ALLOWED_MIME_TYPES = [
-      'image/jpeg',
-      'image/png',
-      'image/webp',
-      'image/gif',
-    ];
+    // L'extension vient du type MIME validé, jamais du nom de fichier client
+    const EXTENSIONS: Record<string, string> = {
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+      'image/gif': 'gif',
+    };
     const MAX_SIZE = 10 * 1024 * 1024;
+    const extension = EXTENSIONS[mimeType];
 
-    if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
+    if (!extension) {
       throw new BadRequestException('Format non supporté');
     }
 
@@ -52,7 +54,6 @@ export class PhotosService {
       profile ?? undefined,
     );
 
-    const extension = originalName.split('.').pop();
     const objectKey = `${userId}/${randomUUID()}.${extension}`;
 
     await provider.upload(file, objectKey, mimeType);

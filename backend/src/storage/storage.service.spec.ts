@@ -5,6 +5,9 @@ import {
   SovereignStorageProvider,
 } from './storage.service';
 
+// Le Garage du homelab (IP privée) est autorisé explicitement, comme en production
+process.env.SOVEREIGN_ENDPOINT_ALLOWED_HOSTS = '192.168.1.20';
+
 jest.mock('@aws-sdk/client-s3', () => {
   return {
     S3Client: jest.fn().mockImplementation(() => ({

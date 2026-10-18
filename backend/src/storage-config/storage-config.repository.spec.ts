@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { StorageConfigRepository } from './storage-config.repository';
 import { DRIZZLE } from 'src/db/drizzle.provider';
+import { randomBytes } from 'crypto';
+import { encryptSecret, isEncrypted } from '../common/secret-cipher';
 
 describe('StorageConfigRepository', () => {
   let repository: StorageConfigRepository;
@@ -102,6 +104,48 @@ describe('StorageConfigRepository', () => {
         }),
       );
       expect(result.mode).toBe('cloud');
+    });
+  });
+
+  describe('chiffrement au repos', () => {
+    const originalKey = process.env.STORAGE_ENCRYPTION_KEY;
+
+    beforeEach(() => {
+      process.env.STORAGE_ENCRYPTION_KEY = randomBytes(32).toString('base64');
+    });
+
+    afterEach(() => {
+      process.env.STORAGE_ENCRYPTION_KEY = originalKey;
+    });
+
+    it('devrait chiffrer les identifiants avant écriture', async () => {
+      await repository.upsert(userId, {
+        mode: 'sovereign',
+        endpoint: 'http://192.168.1.20:3900',
+        bucket: 'sovlens-photos',
+        accessKey: 'access-key',
+        secretKey: 'secret-key',
+      });
+
+      const written = mockDb.values.mock.calls[0][0];
+      expect(isEncrypted(written.accessKey)).toBe(true);
+      expect(isEncrypted(written.secretKey)).toBe(true);
+      expect(written.secretKey).not.toContain('secret-key');
+    });
+
+    it('devrait déchiffrer les identifiants à la lecture', async () => {
+      mockDb.where.mockResolvedValue([
+        {
+          ...mockProfile,
+          accessKey: encryptSecret('access-key'),
+          secretKey: encryptSecret('secret-key'),
+        },
+      ]);
+
+      const result = await repository.findByUserId(userId);
+
+      expect(result?.accessKey).toBe('access-key');
+      expect(result?.secretKey).toBe('secret-key');
     });
   });
 });

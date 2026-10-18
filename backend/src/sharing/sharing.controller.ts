@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -20,7 +21,7 @@ export class SharingController {
 
   // Route publique — pas de guard JWT
   @Get(':token')
-  getSharedResource(@Param('token') token: string) {
+  getSharedResource(@Param('token', ParseUUIDPipe) token: string) {
     return this.sharingService.getSharedResource(token);
   }
 
@@ -37,7 +38,7 @@ export class SharingController {
   @HttpCode(HttpStatus.CREATED)
   createPhotoShareLink(
     @CurrentUser() user: { sub: string; email: string },
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() body: unknown,
   ) {
     const data = createShareLinkSchema.parse(body);
@@ -49,7 +50,7 @@ export class SharingController {
   @HttpCode(HttpStatus.CREATED)
   createAlbumShareLink(
     @CurrentUser() user: { sub: string; email: string },
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() body: unknown,
   ) {
     const data = createShareLinkSchema.parse(body);
@@ -61,7 +62,7 @@ export class SharingController {
   @HttpCode(HttpStatus.OK)
   revokeShareLink(
     @CurrentUser() user: { sub: string; email: string },
-    @Param('token') token: string,
+    @Param('token', ParseUUIDPipe) token: string,
   ) {
     return this.sharingService.revokeShareLink(user.sub, token);
   }

@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { StorageConfigRepository } from './storage-config.repository';
 import { UpdateStorageConfigInput } from './storage-config.validation';
+import { assertSovereignEndpointAllowed } from '../storage/endpoint-guard';
 
 @Injectable()
 export class StorageConfigService {
@@ -23,6 +24,10 @@ export class StorageConfigService {
   }
 
   async updateConfig(userId: string, data: UpdateStorageConfigInput) {
+    if (data.mode === 'sovereign' && data.endpoint) {
+      await assertSovereignEndpointAllowed(data.endpoint);
+    }
+
     if (data.mode === 'sovereign' && !data.endpoint) {
       const existing = await this.storageConfigRepository.findByUserId(userId);
       if (

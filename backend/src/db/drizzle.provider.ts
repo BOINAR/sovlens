@@ -20,7 +20,8 @@ export const DrizzleProvider = {
     const db = drizzle({
       client: pool,
       schema,
-      logger: true,
+      // Les paramètres SQL contiennent des secrets (hash, clés S3) : jamais en production
+      logger: process.env.NODE_ENV !== 'production',
     });
 
     await migrate(db, { migrationsFolder: './drizzle' });

@@ -1,10 +1,12 @@
 import {
+  BadRequestException,
   Controller,
   Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   Req,
   Res,
@@ -29,7 +31,7 @@ export class PhotosController {
     const data = await req.file();
 
     if (!data) {
-      throw new Error('Aucun fichier reçu');
+      throw new BadRequestException('Aucun fichier reçu');
     }
 
     const buffer = await data.toBuffer();
@@ -46,7 +48,7 @@ export class PhotosController {
   @Get(':id/download')
   async download(
     @CurrentUser() user: { sub: string; email: string },
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Res() reply: FastifyReply,
   ) {
     const { stream, photo } = await this.photosService.download(user.sub, id);
@@ -67,7 +69,7 @@ export class PhotosController {
   @Get(':id')
   findOne(
     @CurrentUser() user: { sub: string; email: string },
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.photosService.findOne(user.sub, id);
   }
@@ -76,7 +78,7 @@ export class PhotosController {
   @HttpCode(HttpStatus.OK)
   delete(
     @CurrentUser() user: { sub: string; email: string },
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.photosService.delete(user.sub, id);
   }

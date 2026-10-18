@@ -120,6 +120,23 @@ describe('PhotosService', () => {
       );
     });
 
+    it('devrait ignorer le nom de fichier client pour construire la clé S3', async () => {
+      storageConfigRepository.findByUserId.mockResolvedValue(undefined as any);
+      mockProvider.upload.mockResolvedValue('object-key');
+      photosRepository.create.mockResolvedValue(mockPhoto);
+
+      await service.upload(
+        userId,
+        Buffer.from('x'),
+        'x./../../autre-user/abc',
+        'image/png',
+        1000,
+      );
+
+      const key = mockProvider.upload.mock.calls[0][1];
+      expect(key).toMatch(new RegExp(`^${userId}/[0-9a-f-]+\\.png$`));
+    });
+
     it('devrait rejeter un format non supporté', async () => {
       const file = Buffer.from('fake-data');
 
