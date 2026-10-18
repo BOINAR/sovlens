@@ -11,6 +11,7 @@ export const createUserSchema = createInsertSchema(usersTable, {
   email: () => z.email(),
 }).omit({
   id: true,
+  avatarKey: true, // géré uniquement via /users/me/avatar
   createdAt: true,
   updatedAt: true,
 });

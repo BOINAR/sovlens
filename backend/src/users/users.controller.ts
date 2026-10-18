@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { FastifyRequest } from 'fastify';
 import { UsersService } from './users.service';
 import { UpdateUserInput, updateUserSchema } from './users.validation';
 import { JwtGuard } from '../auth/jwt.guard';
@@ -11,7 +23,27 @@ export class UsersController {
 
   @Get('me')
   getMe(@CurrentUser() user: { sub: string; email: string }) {
-    return this.usersService.findById(user.sub);
+    return this.usersService.getMe(user.sub);
+  }
+
+  @Post('me/avatar')
+  async uploadAvatar(
+    @Req() req: FastifyRequest,
+    @CurrentUser() user: { sub: string; email: string },
+  ) {
+    const data = await req.file();
+
+    if (!data) {
+      throw new BadRequestException('Aucun fichier reçu');
+    }
+
+    const buffer = await data.toBuffer();
+    return this.usersService.uploadAvatar(user.sub, buffer, data.mimetype);
+  }
+
+  @Delete('me/avatar')
+  removeAvatar(@CurrentUser() user: { sub: string; email: string }) {
+    return this.usersService.removeAvatar(user.sub);
   }
 
   @Get(':id')

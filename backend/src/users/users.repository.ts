@@ -48,6 +48,19 @@ export class UsersRepository {
     return user;
   }
 
+  async updateAvatarKey(id: string, avatarKey: string | null) {
+    const [user] = await this.db
+      .update(usersTable)
+      .set({
+        avatarKey,
+        updatedAt: new Date(),
+      })
+      .where(eq(usersTable.id, id))
+      .returning();
+
+    return user;
+  }
+
   async updatePassword(id: string, passwordHash: string) {
     const [user] = await this.db
       .update(usersTable)

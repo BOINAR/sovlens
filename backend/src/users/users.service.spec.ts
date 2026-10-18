@@ -1,16 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersRepository } from './users.repository';
+import { StorageService } from '../storage/storage.service';
 
 describe('UsersService', () => {
   let service: UsersService;
   let usersRepository: jest.Mocked<UsersRepository>;
+  let storageService: jest.Mocked<StorageService>;
 
   const mockUser = {
     id: 'user-id-123',
     email: 'test@sovlens.com',
     passwordHash: 'hashed-password',
+    avatarKey: null as string | null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -27,6 +34,15 @@ describe('UsersService', () => {
             findByEmail: jest.fn(),
             update: jest.fn(),
             updatePassword: jest.fn(),
+            updateAvatarKey: jest.fn(),
+          },
+        },
+        {
+          provide: StorageService,
+          useValue: {
+            upload: jest.fn(),
+            delete: jest.fn(),
+            getSignedUrl: jest.fn(),
           },
         },
       ],
@@ -34,6 +50,7 @@ describe('UsersService', () => {
 
     service = module.get<UsersService>(UsersService);
     usersRepository = module.get(UsersRepository);
+    storageService = module.get(StorageService);
 
     jest.clearAllMocks();
   });
@@ -142,6 +159,110 @@ describe('UsersService', () => {
       await expect(
         service.updatePassword('unknown-id', 'new-hash'),
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('getMe', () => {
+    it('devrait renvoyer avatarUrl null sans avatar, sans exposer les clés', async () => {
+      usersRepository.findById.mockResolvedValue(mockUser);
+
+      const result = await service.getMe(mockUser.id);
+
+      expect(result.avatarUrl).toBeNull();
+      expect(result).not.toHaveProperty('passwordHash');
+      expect(result).not.toHaveProperty('avatarKey');
+      expect(storageService.getSignedUrl).not.toHaveBeenCalled();
+    });
+
+    it("devrait renvoyer une URL signée si l'avatar existe", async () => {
+      usersRepository.findById.mockResolvedValue({
+        ...mockUser,
+        avatarKey: 'user-id-123/avatar/a.png',
+      });
+      storageService.getSignedUrl.mockResolvedValue('https://signed');
+
+      const result = await service.getMe(mockUser.id);
+
+      expect(storageService.getSignedUrl).toHaveBeenCalledWith(
+        'user-id-123/avatar/a.png',
+      );
+      expect(result.avatarUrl).toBe('https://signed');
+    });
+  });
+
+  describe('uploadAvatar', () => {
+    it('devrait rejeter un format non supporté', async () => {
+      await expect(
+        service.uploadAvatar(mockUser.id, Buffer.from('x'), 'image/gif'),
+      ).rejects.toThrow(BadRequestException);
+      expect(storageService.upload).not.toHaveBeenCalled();
+    });
+
+    it('devrait rejeter un fichier de plus de 5 Mo', async () => {
+      const big = Buffer.alloc(5 * 1024 * 1024 + 1);
+      await expect(
+        service.uploadAvatar(mockUser.id, big, 'image/png'),
+      ).rejects.toThrow(BadRequestException);
+      expect(storageService.upload).not.toHaveBeenCalled();
+    });
+
+    it("devrait stocker le nouvel avatar et supprimer l'ancien", async () => {
+      usersRepository.findById.mockResolvedValue({
+        ...mockUser,
+        avatarKey: 'user-id-123/avatar/old.png',
+      });
+
+      await service.uploadAvatar(mockUser.id, Buffer.from('x'), 'image/png');
+
+      const newKey = storageService.upload.mock.calls[0][1];
+      expect(newKey).toMatch(/^user-id-123\/avatar\/.+\.png$/);
+      expect(usersRepository.updateAvatarKey).toHaveBeenCalledWith(
+        mockUser.id,
+        newKey,
+      );
+      expect(storageService.delete).toHaveBeenCalledWith(
+        'user-id-123/avatar/old.png',
+      );
+    });
+
+    it("ne devrait pas échouer si la suppression de l'ancien avatar échoue", async () => {
+      usersRepository.findById.mockResolvedValue({
+        ...mockUser,
+        avatarKey: 'user-id-123/avatar/old.png',
+      });
+      storageService.delete.mockRejectedValue(new Error('S3 down'));
+
+      await expect(
+        service.uploadAvatar(mockUser.id, Buffer.from('x'), 'image/webp'),
+      ).resolves.toBeDefined();
+    });
+  });
+
+  describe('removeAvatar', () => {
+    it("devrait vider la clé et supprimer l'objet", async () => {
+      usersRepository.findById.mockResolvedValue({
+        ...mockUser,
+        avatarKey: 'user-id-123/avatar/a.png',
+      });
+
+      await service.removeAvatar(mockUser.id);
+
+      expect(usersRepository.updateAvatarKey).toHaveBeenCalledWith(
+        mockUser.id,
+        null,
+      );
+      expect(storageService.delete).toHaveBeenCalledWith(
+        'user-id-123/avatar/a.png',
+      );
+    });
+
+    it("ne devrait rien faire s'il n'y a pas d'avatar", async () => {
+      usersRepository.findById.mockResolvedValue(mockUser);
+
+      await service.removeAvatar(mockUser.id);
+
+      expect(usersRepository.updateAvatarKey).not.toHaveBeenCalled();
+      expect(storageService.delete).not.toHaveBeenCalled();
     });
   });
 });

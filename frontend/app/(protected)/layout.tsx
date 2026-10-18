@@ -1,10 +1,13 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import {ChangeEvent, useEffect, useRef, useState} from "react";
 import {usePathname, useRouter} from "next/navigation";
 import {useAuth} from "@/lib/auth/auth-context";
 import {StorageProvider, useStorageMode} from "@/lib/storage/storage-context";
 import Link from "next/link";
+import UserAvatar from "@/components/UserAvatar";
+import {usersApi} from "@/lib/api/endpoints";
+import {ApiError} from "@/lib/api/types";
 
 const NAV_ITEMS = [
   {href: "/gallery", label: "Galerie"},
@@ -54,11 +57,37 @@ function NavLink({
 }
 
 function SidebarContent({onNavigate}: {onNavigate?: () => void}) {
-  const {user, logout} = useAuth();
+  const {user, logout, refreshUser} = useAuth();
   const {config, setCloudMode, setSovereignConfig} = useStorageMode();
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleAvatarChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    await runAvatarAction(() => usersApi.uploadAvatar(file));
+  }
+
+  async function runAvatarAction(action: () => Promise<unknown>) {
+    setAvatarError(null);
+    setAvatarBusy(true);
+    try {
+      await action();
+      await refreshUser();
+      setMenuOpen(false);
+    } catch (err) {
+      setAvatarError(
+        err instanceof ApiError ? err.message : "Impossible de mettre à jour la photo."
+      );
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
   const isSovereign = config?.mode === "sovereign";
 
   async function setSovereignQuick() {
@@ -125,9 +154,32 @@ function SidebarContent({onNavigate}: {onNavigate?: () => void}) {
       <div className="relative mt-3 pt-3 border-t border-sv-border">
         {menuOpen && (
           <div className="absolute bottom-13 left-0 right-0 bg-sv-surface2 border border-[#2c333d] rounded-xl p-1.5 shadow-[0_14px_40px_rgba(0,0,0,.5)]">
-            <div className="px-2.5 py-2 rounded-md text-[12.5px] font-semibold text-sv-text2">
-              Profil &amp; compte
-            </div>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleAvatarChange}
+            />
+            <button
+              type="button"
+              disabled={avatarBusy}
+              onClick={() => avatarInputRef.current?.click()}
+              className="w-full text-left px-2.5 py-2 rounded-md text-[12.5px] font-semibold text-sv-text2 hover:bg-(--sv-soft) disabled:opacity-60">
+              {avatarBusy ? "Envoi…" : user?.avatarUrl ? "Changer la photo de profil" : "Ajouter une photo de profil"}
+            </button>
+            {user?.avatarUrl && (
+              <button
+                type="button"
+                disabled={avatarBusy}
+                onClick={() => runAvatarAction(() => usersApi.removeAvatar())}
+                className="w-full text-left px-2.5 py-2 rounded-md text-[12.5px] font-semibold text-sv-text2 hover:bg-(--sv-soft) disabled:opacity-60">
+                Retirer la photo
+              </button>
+            )}
+            {avatarError && (
+              <p className="px-2.5 py-1 text-[11.5px] text-red-400">{avatarError}</p>
+            )}
             <div className="px-2.5 py-2 rounded-md text-[12.5px] font-semibold text-sv-text2">
               Aide &amp; support
             </div>
@@ -142,7 +194,7 @@ function SidebarContent({onNavigate}: {onNavigate?: () => void}) {
         <button
           onClick={() => setMenuOpen(v => !v)}
           className="flex items-center gap-2.5 w-full px-2 py-3 pb-1 rounded-lg">
-          <div className="w-7.5 h-7.5 rounded-full bg-gradient-to-br from-[#2c333d] to-[#1a1e24] border border-[#333b46] flex-none" />
+          <UserAvatar user={user} className="w-7.5 h-7.5 text-[12px]" />
           <div className="leading-tight flex-1 min-w-0 text-left">
             <div className="font-semibold text-[12.5px] truncate">
               {user?.email?.split("@")[0]}
@@ -162,6 +214,7 @@ function SidebarContent({onNavigate}: {onNavigate?: () => void}) {
 }
 
 function AppShellInner({children}: {children: React.ReactNode}) {
+  const {user} = useAuth();
   const {config, setCloudMode, setSovereignConfig} = useStorageMode();
   const pathname = usePathname();
   const router = useRouter();
@@ -263,7 +316,9 @@ function AppShellInner({children}: {children: React.ReactNode}) {
             </button>
           </div>
 
-          <div className="hidden sm:block w-8.5 h-8.5 rounded-full bg-gradient-to-br from-[#2c333d] to-[#1a1e24] border border-[#333b46] flex-none" />
+          <div className="hidden sm:block flex-none">
+            <UserAvatar user={user} className="w-8.5 h-8.5 text-[13px]" />
+          </div>
         </div>
 
         <div className="flex-1 overflow-auto px-4 sm:px-5 md:px-6.5 py-4 md:py-6">

@@ -27,6 +27,12 @@ export const authApi = {
 
 export const usersApi = {
   me: () => apiClient.get<User>('/users/me'),
+  uploadAvatar: (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return apiClient.postForm<User>('/users/me/avatar', form);
+  },
+  removeAvatar: () => apiClient.delete<User>('/users/me/avatar'),
   updatePassword: (currentPassword: string, newPassword: string) =>
     apiClient.patch<void>('/users/me/password', { currentPassword, newPassword }),
 };

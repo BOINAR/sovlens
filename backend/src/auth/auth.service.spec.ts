@@ -24,6 +24,7 @@ describe('AuthService', () => {
     id: 'user-id-123',
     email: 'test@sovlens.com',
     passwordHash: 'hashed-password',
+    avatarKey: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

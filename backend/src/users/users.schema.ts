@@ -4,6 +4,8 @@ export const usersTable = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
+  // Clé S3 de la photo de profil (stockage cloud SovLens), null si aucune
+  avatarKey: text('avatar_key'),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),

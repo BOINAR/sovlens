@@ -5,6 +5,7 @@ export type StorageMode = 'cloud' | 'sovereign';
 export interface User {
   id: string;
   email: string;
+  avatarUrl: string | null;
   createdAt: string;
 }
 
