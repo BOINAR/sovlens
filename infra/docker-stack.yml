@@ -1,3 +1,10 @@
+# Rotation des logs des conteneurs : sans limite, ils grossissent indéfiniment sur le disque du VPS
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   backend:
     image: ghcr.io/boinar/sovlens/backend:${IMAGE_TAG:-latest}
@@ -19,6 +26,7 @@ services:
       NODE_ENV: production
     networks:
       - sovlens-net
+    logging: *default-logging
     deploy:
       replicas: 1
       restart_policy:
@@ -43,6 +51,7 @@ services:
       NODE_ENV: production
     networks:
       - sovlens-net
+    logging: *default-logging
     deploy:
       replicas: 1
       restart_policy:
@@ -64,6 +73,7 @@ services:
       - postgres-data:/var/lib/postgresql
     networks:
       - sovlens-net
+    logging: *default-logging
     deploy:
       replicas: 1
       restart_policy:
@@ -87,6 +97,7 @@ services:
         mode: 0400
     networks:
       - sovlens-net
+    logging: *default-logging
     deploy:
       replicas: 1
       restart_policy:
@@ -118,6 +129,7 @@ services:
         mode: 0400
     networks:
       - sovlens-net
+    logging: *default-logging
     deploy:
       replicas: 1
       restart_policy:
@@ -139,6 +151,7 @@ services:
       - caddy-config:/config
     networks:
       - sovlens-net
+    logging: *default-logging
     deploy:
       replicas: 1
       placement:

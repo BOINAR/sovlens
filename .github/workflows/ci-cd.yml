@@ -193,6 +193,15 @@ jobs:
               | grep -v "_${SECRET_VERSION}$" \
               | xargs -r docker config rm >/dev/null 2>&1 || true
 
+            # Nettoyage disque, limité à SovLens : anciennes images backend/frontend
+            # (toutes restent disponibles dans GHCR pour un retour arrière).
+            # Une image encore utilisée par un conteneur est refusée par docker et ignorée.
+            docker image ls --filter "reference=ghcr.io/boinar/sovlens/*" --format '{{.Repository}}:{{.Tag}}' \
+              | grep -v ":${IMAGE_TAG}$" \
+              | xargs -r docker image rm >/dev/null 2>&1 || true
+            # Swarm garde par défaut 5 conteneurs arrêtés par service : 2 suffisent pour diagnostiquer
+            docker swarm update --task-history-limit 2 >/dev/null
+
   deploy-monitoring:
     name: Deploy monitoring (Swarm)
     needs: deploy-prod
@@ -234,3 +243,7 @@ jobs:
               | grep -E '^(grafana_admin_password|garage_homelab_metrics_token)_' \
               | grep -v "_${SECRET_VERSION}$" \
               | xargs -r docker secret rm >/dev/null 2>&1 || true
+
+            # Les images :latest remplacées deviennent orphelines (<none>) : suppression des seules
+            # images sans tag et inutilisées, ce qui ne touche à aucun autre projet
+            docker image prune -f >/dev/null 2>&1 || true

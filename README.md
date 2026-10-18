@@ -116,6 +116,8 @@ Tout push sur `main` déclenche le pipeline `.github/workflows/ci-cd.yml` :
 4. Déploiement de la stack applicative sur le VPS (Docker Swarm)
 5. Déploiement de la stack de monitoring
 
+Chaque déploiement nettoie le disque du VPS sans toucher aux autres projets : il supprime les anciennes images SovLens (elles restent dans GHCR pour un retour arrière) et les images de monitoring remplacées, et limite l'historique Swarm à 2 conteneurs arrêtés par service. Les logs de chaque conteneur sont plafonnés à 3 fichiers de 10 Mo.
+
 Aucun secret n'est stocké dans le dépôt ni sur le serveur : ils sont définis dans les GitHub Secrets et injectés au moment du déploiement, en variables d'environnement ou en Docker secrets. L'inventaire est dans [`documentation/architecture/secrets.md`](./documentation/architecture/secrets.md).
 
 ## Sauvegarde et restauration

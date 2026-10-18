@@ -1,3 +1,10 @@
+# Rotation des logs des conteneurs : sans limite, ils grossissent indéfiniment sur le disque du VPS
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   prometheus:
     image: prom/prometheus:latest
@@ -12,6 +19,7 @@ services:
     networks:
       - sovlens-net
       - monitoring-net
+    logging: *default-logging
     deploy:
       replicas: 1
       restart_policy:
@@ -30,6 +38,7 @@ services:
     networks:
       - sovlens-net
       - monitoring-net
+    logging: *default-logging
     deploy:
       replicas: 1
       restart_policy:
@@ -47,6 +56,7 @@ services:
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     networks:
       - monitoring-net
+    logging: *default-logging
     deploy:
       mode: global
 
@@ -59,6 +69,7 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
     networks:
       - monitoring-net
+    logging: *default-logging
     deploy:
       mode: global
 
